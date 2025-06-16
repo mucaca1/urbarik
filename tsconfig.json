@@ -10,8 +10,6 @@
     "baseUrl": ".",
     "outDir": "dist",
     "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "jsx": "react-jsx",
-    "strict": true
+    "resolveJsonModule": true
   }
 }
