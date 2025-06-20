@@ -1,8 +1,8 @@
-import { app, Menu } from "electron";
+import { app, BrowserWindow, Menu } from "electron";
 
 const name = app.getName();
 
-export function createMenu() {
+export function createMenu(bw: BrowserWindow) {
     Menu.setApplicationMenu(Menu.buildFromTemplate([
         {
             label: name,
