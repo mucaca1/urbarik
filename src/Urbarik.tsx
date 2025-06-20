@@ -3,7 +3,6 @@ import {
     useAppOwner,
     useQuery,
 } from "@evolu/react";
-import { evoluReactWebDeps } from "@evolu/react-web";
 import { memo, Suspense, FC, useState } from "react";
 import { Button } from "@mui/material";
 import { evolu } from "./evolu-db";
