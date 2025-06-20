@@ -1,11 +1,11 @@
 {
   "name": "urbarik",
-  "productName": "electron-react",
+  "productName": "Urbárik",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".vite/build/main.js",
   "scripts": {
-    "start": "electron-forge start",
+    "start:dev": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
@@ -13,8 +13,7 @@
   },
   "keywords": [],
   "author": {
-    "name": "mucaca1",
-    "email": "Mastnyvlas@gmail.com"
+    "name": "mucaca1"
   },
   "license": "MIT",
   "devDependencies": {
@@ -27,6 +26,7 @@
     "@electron-forge/plugin-fuses": "^7.8.1",
     "@electron-forge/plugin-vite": "^7.8.1",
     "@electron/fuses": "^1.8.0",
+    "@types/electron-squirrel-startup": "^1.0.2",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "electron": "36.4.0",
@@ -37,6 +37,7 @@
     "vite": "^5.4.19"
   },
   "dependencies": {
+    "@effect/schema": "^0.75.5",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@evolu/common": "^6.0.1-preview.8",
@@ -45,6 +46,7 @@
     "@mui/material": "^7.1.1",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.5.2",
     "electron-squirrel-startup": "^1.0.1"
   }
 }
