@@ -7,6 +7,7 @@ import { memo, Suspense, FC, useState } from "react";
 import { Button } from "@mui/material";
 import { evolu } from "./evolu-db";
 import { getAllSubjectsQuery, TAllSubjectsRow } from "./evolu-queries";
+import { SettingsScreen } from "./screens/settings-screen";
 
 export const Urbarik = memo(function Urbarik() {
     return (
@@ -14,7 +15,7 @@ export const Urbarik = memo(function Urbarik() {
             <div>
                 <EvoluProvider value={evolu}>
                     <Suspense>
-                        <Subjects/>
+                        <SettingsScreen />
                     </Suspense>
                 </EvoluProvider>
             </div>

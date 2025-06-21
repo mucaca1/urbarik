@@ -5,11 +5,12 @@
   "description": "My Electron application description",
   "main": ".vite/build/main.js",
   "scripts": {
-    "start:dev": "electron-forge start",
+    "build": "electron-forge make",
+    "clean": "shx rm -rf node_modules .vite out",
+    "dev": "electron-forge start",
+    "lint": "eslint --ext .ts,.tsx .",
     "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "publish": "electron-forge publish"
   },
   "keywords": [],
   "author": {
@@ -43,7 +44,8 @@
     "@evolu/common": "^6.0.1-preview.8",
     "@evolu/react": "^9.0.1-preview.2",
     "@evolu/react-web": "^1.0.1-preview.2",
-    "@mui/material": "^7.1.1",
+    "@mui/icons-material": "^7.1.2",
+    "@mui/material": "^7.1.2",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.5.2",

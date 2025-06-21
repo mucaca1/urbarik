@@ -6,7 +6,7 @@ const queryOptions = {
 };
 
 export const getAllSubjectsQuery = evolu.createQuery((db) =>
-    db.selectFrom('subject').selectAll(), queryOptions,
+    db.selectFrom("subject").selectAll(), queryOptions,
 );
 
 export type TAllSubjectsRow = typeof getAllSubjectsQuery.Row;
