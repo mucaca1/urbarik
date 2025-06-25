@@ -6,7 +6,8 @@ import {
     maxLength,
     NonEmptyString,
     nullOr,
-    SimpleName
+    SimpleName,
+    createRandom
 } from "@evolu/common";
 import { evoluReactWebDeps } from "@evolu/react-web";
 
@@ -48,14 +49,9 @@ export const evolu = createEvolu(evoluReactWebDeps)(Schema, {
 
     initialData: (evolu) => {
         console.log("Init data")
-        const matejResult = evolu.insert('subject', {
-            name: "Matej", surname: "Mrkva"
+        evolu.insert('subject', {
+            name: "Matej" + createRandom().next(), surname: "Mrkva"
         });
-        const tomasResult = evolu.insert('subject', {
-            name: "Tomas", surname: "Kudla"
-        });
-
-        console.log(matejResult.ok + " " + tomasResult.ok);
     },
 
     indexes: (create) => [

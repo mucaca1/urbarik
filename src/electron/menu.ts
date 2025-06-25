@@ -1,5 +1,4 @@
 import { app, BrowserWindow, Menu } from "electron";
-import { ipcWebContentsSend } from "./util";
 
 const name = app.getName();
 
