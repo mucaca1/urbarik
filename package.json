@@ -34,7 +34,7 @@
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.31.0",
     "ts-node": "^10.9.2",
-    "typescript": "~4.5.4",
+    "typescript": "^5.8.3",
     "vite": "^5.4.19"
   },
   "dependencies": {
@@ -50,6 +50,9 @@
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.5.2",
     "electron-squirrel-startup": "^1.0.1",
+    "i18next": "^25.2.1",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "react-i18next": "^15.5.3",
     "react-router-dom": "^7.6.2"
   }
 }

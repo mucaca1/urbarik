@@ -4,8 +4,10 @@ import HomeIcon from '@mui/icons-material/Home';
 import CottageIcon from '@mui/icons-material/Cottage';
 import { AppBar, Box, Button, Container, IconButton, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const MenuBar: React.FC = () => {
+        const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     return (
         <Box sx={{ flexGrow: 1, display: { xs: 'flex' } }}>
@@ -47,7 +49,7 @@ const MenuBar: React.FC = () => {
                             >
                                 <HomeIcon className="default-icon" />
                                 <CottageIcon className="hover-icon" />
-                                <span style={{ marginLeft: '8px' }}>Home</span>
+                                <span style={{ marginLeft: '8px' }}>{t('home')}</span>
                             </Button>
                             <Button
                                 color="inherit"
@@ -63,7 +65,7 @@ const MenuBar: React.FC = () => {
                                 }}
                                 startIcon={<span className="rotate-icon"><SettingsIcon /></span>}
                             >
-                                Settings
+                                {t('settings')}
                             </Button>
                         </Box>
                     </Toolbar>

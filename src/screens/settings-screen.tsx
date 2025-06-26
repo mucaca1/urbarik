@@ -5,8 +5,10 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { QuestionDialog } from "../components/dialog";
 import { getAllSubjectsQuery } from "../evolu-queries";
+import { useTranslation } from "react-i18next";
 
 export const SettingsScreen: FC = () => {
+    const { t, i18n } = useTranslation();
     const owner = useAppOwner();
     const evolu = useEvolu();
     const [isResetAppOwnerDialogOpen, setResetAppOwnerDialogOpen] = useState(false);
@@ -14,9 +16,14 @@ export const SettingsScreen: FC = () => {
 
     const [unit, setUnit] = useState<string>('m');
 
+
+    const changeLanguage = (lng: string) => {
+        i18n.changeLanguage(lng);
+    };
+
     return (
         <div>
-            <h1>Settings</h1>
+            <h1>{t('settings')}</h1>
             <SettingsSection title="Jednotky">
                 <Box display="flex" flexDirection="column" gap={2}>
                     <FormControl fullWidth>
@@ -36,6 +43,16 @@ export const SettingsScreen: FC = () => {
             </SettingsSection>
 
             <SettingsSection title="Custom">
+                <TextField
+                    select
+                    label={t('language')}
+                    fullWidth
+                    defaultValue="en"
+                    onChange={(e) => changeLanguage(e.target.value)}
+                >
+                    <MenuItem value="en">En</MenuItem>
+                    <MenuItem value="sk">Sk</MenuItem>
+                </TextField>
                 <TextField
                     select
                     label="Theme"
