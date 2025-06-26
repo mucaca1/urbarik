@@ -13,15 +13,11 @@ export const SettingsScreen: FC = () => {
     const [isImportAppOwnerDialogOpen, setImportAppOwnerDialogOpen] = useState(false);
 
 
-    const rows = useQuery(getAllSubjectsQuery);
-    const demoData = rows.map((row) => (
-        <div>{row.name}</div>
-    ))
-
     return (
         <div>
             <h1>Settings</h1>
-            {demoData}
+            <br />
+            <br />
             <FormControl variant="outlined" fullWidth disabled>
                 <InputLabel htmlFor="mnemonic-content">Mnemonic</InputLabel>
                 <OutlinedInput
