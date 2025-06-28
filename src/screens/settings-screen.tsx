@@ -1,12 +1,14 @@
 import { useAppOwner, useQuery, useEvolu } from "@evolu/react";
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, MenuItem, OutlinedInput, Paper, Select, TextField, Typography } from "@mui/material";
-import { FC, useState } from "react";
+import { useContext, useState } from "react";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { QuestionDialog } from "../components/dialog";
 import { useTranslation } from "react-i18next";
+import { ThemeContext } from "../ThemeContext";
+import { ThemeMode } from "../themes";
 
-export const SettingsScreen: FC = () => {
+export const SettingsScreen: React.FC = () => {
     const { t, i18n } = useTranslation();
     const owner = useAppOwner();
     const evolu = useEvolu();
@@ -15,6 +17,9 @@ export const SettingsScreen: FC = () => {
 
     let language = i18n.language || 'sk';
     let areaUnit = localStorage.getItem('areaUnit') || 'm';
+
+    const { mode, setTheme } = useContext(ThemeContext);
+    const [theme, setThemeChoice] = useState<ThemeMode>(mode)
 
     return (
         <div>
@@ -34,10 +39,11 @@ export const SettingsScreen: FC = () => {
                     select
                     label={t('theme')}
                     fullWidth
-                    defaultValue="light"
+                    defaultValue={mode}
+                    onChange={(e) => setThemeChoice(e.target.value === 'light' ? 'light' : 'dark')}
                 >
-                    <MenuItem value="light">Light</MenuItem>
-                    <MenuItem value="dark">Dark</MenuItem>
+                    <MenuItem value="light">{t('themeLight')}</MenuItem>
+                    <MenuItem value="dark">{t('themeDark')}</MenuItem>
                 </TextField>
 
                 <Box display="flex" flexDirection="column" gap={2}>
@@ -63,6 +69,7 @@ export const SettingsScreen: FC = () => {
                         <Button fullWidth onClick={() => {
                             i18n.changeLanguage(language);
                             localStorage.setItem('areaUnit', areaUnit);
+                            setTheme(theme);
                         }}>{t('saveBtn')}</Button>
                     </Grid>
                 </Grid>

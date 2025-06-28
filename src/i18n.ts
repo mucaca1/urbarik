@@ -29,7 +29,9 @@ i18n
                     import: 'Import',
                     importMnemonicDialog: 'Write your mnemonic key',
                     deleteMnemonicQuestion: 'Are you sure you wand delete owner data?',
-                    saveBtn: 'Save'
+                    saveBtn: 'Save',
+                    themeLight: 'Light',
+                    themeDark: 'Dark',
 
                 },
             },
@@ -48,7 +50,9 @@ i18n
                     import: 'Import',
                     importMnemonicDialog: 'Napíš svoj mnemonic kľúč',
                     deleteMnemonicQuestion: 'Si si naozaj istný, že chceš odstrániť všetky dáta používateľa?',
-                    saveBtn: 'Uložiť'
+                    saveBtn: 'Uložiť',
+                    themeLight: 'Svetlá',
+                    themeDark: 'Tmavá',
                 },
             },
         },
