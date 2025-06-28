@@ -3,6 +3,8 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, D
 import { useContext, useState } from "react";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { QuestionDialog } from "../components/dialog";
 import { useTranslation } from "react-i18next";
 import { ThemeContext } from "../ThemeContext";
@@ -20,6 +22,8 @@ export const SettingsScreen: React.FC = () => {
 
     const { mode, setTheme } = useContext(ThemeContext);
     const [theme, setThemeChoice] = useState<ThemeMode>(mode)
+
+    const [showMnemonic, setShowMnemonic] = useState<boolean>(false);
 
     return (
         <div>
@@ -79,17 +83,26 @@ export const SettingsScreen: React.FC = () => {
                 <FormControl variant="outlined" fullWidth disabled>
                     <InputLabel htmlFor="mnemonic-content">Mnemonic</InputLabel>
                     <OutlinedInput
-                        value={owner?.mnemonic || ""}
+                        value={showMnemonic ? owner?.mnemonic || "" : "• • • •  • • • •  • • • •  • • • •"}
                         id="mnemonic-content"
                         type={"text"}
                         endAdornment={
-                            <InputAdornment position="end">
-                                <IconButton
-                                    onClick={() => navigator.clipboard.writeText(owner?.mnemonic.toString() || "")}
-                                >
-                                    <ContentCopyIcon />
-                                </IconButton>
-                            </InputAdornment>
+                            <div>
+                                <InputAdornment position="end">
+                                    <IconButton
+                                            onClick={() => navigator.clipboard.writeText(owner?.mnemonic.toString() || "")}
+                                        >
+                                            <ContentCopyIcon />
+                                    </IconButton>
+                                    <IconButton
+                                        onClick={() => setShowMnemonic(!showMnemonic)}
+                                    >
+                                        {!showMnemonic && <VisibilityIcon />}
+                                        {showMnemonic && <VisibilityOffIcon />}
+                                    </IconButton>
+                                
+                                </InputAdornment>
+                            </div>
                         }
                         label="Mnemonic"
                     />
