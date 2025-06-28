@@ -1,10 +1,9 @@
 import { useAppOwner, useQuery, useEvolu } from "@evolu/react";
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, OutlinedInput, Paper, Select, TextField, Typography } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, MenuItem, OutlinedInput, Paper, Select, TextField, Typography } from "@mui/material";
 import { FC, useState } from "react";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { QuestionDialog } from "../components/dialog";
-import { getAllSubjectsQuery } from "../evolu-queries";
 import { useTranslation } from "react-i18next";
 
 export const SettingsScreen: FC = () => {
@@ -14,57 +13,62 @@ export const SettingsScreen: FC = () => {
     const [isResetAppOwnerDialogOpen, setResetAppOwnerDialogOpen] = useState(false);
     const [isImportAppOwnerDialogOpen, setImportAppOwnerDialogOpen] = useState(false);
 
-    const [unit, setUnit] = useState<string>('m');
-
-
-    const changeLanguage = (lng: string) => {
-        i18n.changeLanguage(lng);
-    };
+    let language = i18n.language || 'sk';
+    let areaUnit = localStorage.getItem('areaUnit') || 'm';
 
     return (
         <div>
             <h1>{t('settings')}</h1>
-            <SettingsSection title="Jednotky">
-                <Box display="flex" flexDirection="column" gap={2}>
-                    <FormControl fullWidth>
-                        <InputLabel id="unit-label">Select Unit</InputLabel>
-                        <Select
-                            labelId="unit-label"
-                            value={unit}
-                            label="Select Unit"
-                            onChange={(e) => setUnit(e.target.value)}
-                        >
-                            <MenuItem value="m">Meters (m)</MenuItem>
-                            <MenuItem value="km">Kilometers (km)</MenuItem>
-                            <MenuItem value="ha">Hectares (ha)</MenuItem>
-                        </Select>
-                    </FormControl>
-                </Box>
-            </SettingsSection>
-
-            <SettingsSection title="Custom">
+            <SettingsSection title={t('systemSectionLabel')}>
                 <TextField
                     select
                     label={t('language')}
                     fullWidth
-                    defaultValue="en"
-                    onChange={(e) => changeLanguage(e.target.value)}
+                    defaultValue={language}
+                    onChange={(e) => language = e.target.value}
                 >
                     <MenuItem value="en">En</MenuItem>
                     <MenuItem value="sk">Sk</MenuItem>
                 </TextField>
                 <TextField
                     select
-                    label="Theme"
+                    label={t('theme')}
                     fullWidth
                     defaultValue="light"
                 >
                     <MenuItem value="light">Light</MenuItem>
                     <MenuItem value="dark">Dark</MenuItem>
                 </TextField>
+
+                <Box display="flex" flexDirection="column" gap={2}>
+                    <FormControl fullWidth>
+                        <InputLabel id="unit-label">{t('unitSelectionLabel')}</InputLabel>
+                        <Select
+                            labelId="unit-label"
+                            value={areaUnit}
+                            label={t('unitSelectionLabel')}
+                            onChange={(e) => areaUnit = e.target.value}
+                        >
+                            <MenuItem value="m">Meters (m<sup>2</sup>)</MenuItem>
+                            <MenuItem value="km">Kilometers (km<sup>2</sup>)</MenuItem>
+                            <MenuItem value="ha">Hectares (ha)</MenuItem>
+                        </Select>
+                    </FormControl>
+                </Box>
+                <Grid container spacing={2}>
+                    <Grid size={6}>
+                        <Button fullWidth>{t('cancelBtn')}</Button>
+                    </Grid>
+                    <Grid size={6}>
+                        <Button fullWidth onClick={() => {
+                            i18n.changeLanguage(language);
+                            localStorage.setItem('areaUnit', areaUnit);
+                        }}>{t('saveBtn')}</Button>
+                    </Grid>
+                </Grid>
             </SettingsSection>
 
-            <SettingsSection title="Private">
+            <SettingsSection title={t('private')}>
                 <FormControl variant="outlined" fullWidth disabled>
                     <InputLabel htmlFor="mnemonic-content">Mnemonic</InputLabel>
                     <OutlinedInput
@@ -90,7 +94,7 @@ export const SettingsScreen: FC = () => {
                     color="error"
                     fullWidth
                     onClick={() => setResetAppOwnerDialogOpen(true)}>
-                    Delete all data
+                    {t('deleteAllData')}
                 </Button>
                 <Dialog
                     fullWidth
@@ -110,10 +114,10 @@ export const SettingsScreen: FC = () => {
                         },
                     }}
                 >
-                    <DialogTitle>Subscribe</DialogTitle>
+                    <DialogTitle>{t('import')}</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Write your mnemonic key
+                            {t('importMnemonicDialog')}
                         </DialogContentText>
                         <TextField
                             autoFocus
@@ -128,13 +132,13 @@ export const SettingsScreen: FC = () => {
                         />
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={() => setImportAppOwnerDialogOpen(false)}>Cancel</Button>
-                        <Button type="submit">Import</Button>
+                        <Button onClick={() => setImportAppOwnerDialogOpen(false)}>{t('cancelBtn')}</Button>
+                        <Button type="submit">{t('import')}</Button>
                     </DialogActions>
                 </Dialog>
 
                 <QuestionDialog
-                    question="Are you sure you wand delete owner data?"
+                    question={t('deleteMnemonicQuestion')}
                     open={isResetAppOwnerDialogOpen}
                     onClose={() => setResetAppOwnerDialogOpen(false)}
                     onConfirm={() => evolu.resetAppOwner()}

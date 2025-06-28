@@ -1,5 +1,8 @@
+import { useTranslation } from "react-i18next";
+
 export const HomeScreen: React.FC = () => {
+    const {t} = useTranslation();
     return (
-        <div>Home</div>
+        <div>{t('home')}</div>
     );
 }
