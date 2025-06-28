@@ -10,8 +10,9 @@ import { SettingsScreen } from "./screens/settings-screen";
 import MenuBar from "./components/menu";
 import { BrowserRouter, NavLink, Route, Router, Routes } from "react-router-dom"
 import { HomeScreen } from "./screens/home-screen";
-import { ThemeProvider } from "./ThemeContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import React from "react";
+import { UnitProvider } from "./context/UnitContext";
 
 export const Urbarik = memo(function Urbarik() {
     return (
@@ -19,23 +20,25 @@ export const Urbarik = memo(function Urbarik() {
             <EvoluProvider value={evolu}>
                 <React.StrictMode>
                     <ThemeProvider>
-                        <BrowserRouter>
-                            <MenuBar />
-                            <Suspense >
-                                <div style={{ maxWidth: "90%", padding: "2rem" }}>
-                                    <Routes>
-                                        <Route
-                                            path="/"
-                                            element={<HomeScreen />}
-                                        />
-                                        <Route
-                                            path="/settings"
-                                            element={<SettingsScreen />}
-                                        />
-                                    </Routes>
-                                </div>
-                            </Suspense>
-                        </BrowserRouter>
+                        <UnitProvider>
+                            <BrowserRouter>
+                                <MenuBar />
+                                <Suspense >
+                                    <div style={{ maxWidth: "90%", padding: "2rem" }}>
+                                        <Routes>
+                                            <Route
+                                                path="/"
+                                                element={<HomeScreen />}
+                                            />
+                                            <Route
+                                                path="/settings"
+                                                element={<SettingsScreen />}
+                                            />
+                                        </Routes>
+                                    </div>
+                                </Suspense>
+                            </BrowserRouter>
+                        </UnitProvider>
                     </ThemeProvider>
                 </React.StrictMode>
             

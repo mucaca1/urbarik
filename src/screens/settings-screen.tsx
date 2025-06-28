@@ -1,5 +1,5 @@
 import { useAppOwner, useQuery, useEvolu } from "@evolu/react";
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, MenuItem, OutlinedInput, Paper, Select, TextField, Typography } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, FormControl, FormLabel, Grid, IconButton, InputAdornment, InputLabel, MenuItem, OutlinedInput, Paper, Select, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { useContext, useState } from "react";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -7,8 +7,11 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { QuestionDialog } from "../components/dialog";
 import { useTranslation } from "react-i18next";
-import { ThemeContext } from "../ThemeContext";
+import { ThemeContext } from "../context/ThemeContext";
 import { ThemeMode } from "../themes";
+import { Label } from "@mui/icons-material";
+import { useUnit } from "../context/UnitContext";
+import { AreaUnit } from "src/utils/unitConversion";
 
 export const SettingsScreen: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -18,12 +21,19 @@ export const SettingsScreen: React.FC = () => {
     const [isImportAppOwnerDialogOpen, setImportAppOwnerDialogOpen] = useState(false);
 
     let language = i18n.language || 'sk';
-    let areaUnit = localStorage.getItem('areaUnit') || 'm';
 
     const { mode, setTheme } = useContext(ThemeContext);
     const [theme, setThemeChoice] = useState<ThemeMode>(mode)
 
     const [showMnemonic, setShowMnemonic] = useState<boolean>(false);
+
+    const { unit, setAreaUnit } = useUnit();
+    
+    const [areaUnitHolder, setAreaUnitHolder] = useState<AreaUnit>(unit);
+
+        const handleAreaUnitChange = (event: React.MouseEvent<HTMLElement>, newUnit: string | null) => {
+            if (newUnit) setAreaUnitHolder(newUnit as any);
+        };
 
     return (
         <div>
@@ -50,20 +60,13 @@ export const SettingsScreen: React.FC = () => {
                     <MenuItem value="dark">{t('themeDark')}</MenuItem>
                 </TextField>
 
-                <Box display="flex" flexDirection="column" gap={2}>
-                    <FormControl fullWidth>
-                        <InputLabel id="unit-label">{t('unitSelectionLabel')}</InputLabel>
-                        <Select
-                            labelId="unit-label"
-                            value={areaUnit}
-                            label={t('unitSelectionLabel')}
-                            onChange={(e) => areaUnit = e.target.value}
-                        >
-                            <MenuItem value="m">Meters (m<sup>2</sup>)</MenuItem>
-                            <MenuItem value="km">Kilometers (km<sup>2</sup>)</MenuItem>
-                            <MenuItem value="ha">Hectares (ha)</MenuItem>
-                        </Select>
-                    </FormControl>
+                <Box display="flex" flexDirection="row" gap={2} alignItems="center">
+                    <Typography variant="body1" sx={{ whiteSpace: 'nowrap' }}>{t('unitSelectionLabel')}</Typography>
+                    <ToggleButtonGroup value={areaUnitHolder} exclusive onChange={handleAreaUnitChange} size="large" fullWidth>
+                        <ToggleButton value="m2">m²</ToggleButton>
+                        <ToggleButton value="km2">km²</ToggleButton>
+                        <ToggleButton value="ha">ha</ToggleButton>
+                    </ToggleButtonGroup>
                 </Box>
                 <Grid container spacing={2}>
                     <Grid size={6}>
@@ -72,8 +75,8 @@ export const SettingsScreen: React.FC = () => {
                     <Grid size={6}>
                         <Button fullWidth onClick={() => {
                             i18n.changeLanguage(language);
-                            localStorage.setItem('areaUnit', areaUnit);
                             setTheme(theme);
+                            if (areaUnitHolder) setAreaUnit(areaUnitHolder as any);
                         }}>{t('saveBtn')}</Button>
                     </Grid>
                 </Grid>
