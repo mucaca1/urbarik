@@ -30,7 +30,6 @@ interface AreaInputProps extends Omit<TextFieldProps, 'value' | 'onChange'> {
 const AreaUnitInput: React.FC<AreaInputProps> = ({
     baseValue,
     onBaseValueChange,
-    label,
     ...restProps
 }) => {
     const { unit } = useUnit();
@@ -51,6 +50,7 @@ const AreaUnitInput: React.FC<AreaInputProps> = ({
 
     return (
         <AreaUnitInputField
+            {...restProps}
             type="number"
             value={localValue}
             onChange={handleChange}
@@ -71,7 +71,6 @@ const AreaUnitInput: React.FC<AreaInputProps> = ({
                     ),
                 },
             }}
-            {...restProps}
         />
     );
 };

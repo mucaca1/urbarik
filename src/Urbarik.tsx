@@ -3,12 +3,11 @@ import {
     useAppOwner,
     useQuery,
 } from "@evolu/react";
-import { memo, Suspense, FC, useState } from "react";
-import { AppBar, Box, Button, Container, IconButton, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
+import { memo, Suspense } from "react";
 import { evolu } from "./evolu-db";
 import { SettingsScreen } from "./screens/settings-screen";
 import MenuBar from "./components/menu";
-import { BrowserRouter, NavLink, Route, Router, Routes } from "react-router-dom"
+import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { HomeScreen } from "./screens/home-screen";
 import { ThemeProvider } from "./context/ThemeContext";
 import React from "react";

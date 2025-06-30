@@ -14,12 +14,6 @@ import { AreaUnit } from "../utils/unitConversion";
 import AreaUnitInput from "../components/AreaUnitInput";
 import React from "react";
 
-interface Snapshot {
-    mode: ThemeMode;
-    unit: AreaUnit;
-    language: string;
-  }
-
 export const SettingsScreen: React.FC = () => {
     const { t, i18n } = useTranslation();
     const owner = useAppOwner();
@@ -40,12 +34,6 @@ export const SettingsScreen: React.FC = () => {
     };
 
     const [areaInM2, setAreaInM2] = useState(10263); // stored in base unit
-
-    const [snapshot, setSnapshot] = useState<Snapshot>({
-        language: language,
-        mode: mode,
-        unit: unit
-    });
 
     return (
         <div>
@@ -81,14 +69,11 @@ export const SettingsScreen: React.FC = () => {
                         <ToggleButton value="ha">ha</ToggleButton>
                     </ToggleButtonGroup>
                 </Box>
-                <AreaUnitInput label='Visualization' baseValue={areaInM2} onBaseValueChange={setAreaInM2} fullWidth disabled />
+                <AreaUnitInput label={t('preview')} baseValue={areaInM2} onBaseValueChange={setAreaInM2} fullWidth disabled />
                 <Grid container spacing={2}>
                     <Grid size={6}>
                         <Button fullWidth onClick={() => {
-                            setTheme(snapshot.mode);
-                            setAreaUnit(snapshot.unit);
-                            setLanguage(snapshot.language);
-                            // Language does not implement live change on click.
+                            window.location.reload();
                         }}>{t('cancelBtn')}</Button>
                     </Grid>
                     <Grid size={6}>
@@ -96,12 +81,6 @@ export const SettingsScreen: React.FC = () => {
                             i18n.changeLanguage(language);
                             storeTheme(mode);
                             if (unit) storeAreaUnit(unit as any);
-
-                            setSnapshot({
-                                language: language,
-                                mode: mode,
-                                unit: unit
-                            })
                         }}>{t('saveBtn')}</Button>
                     </Grid>
                 </Grid>

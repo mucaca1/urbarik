@@ -32,7 +32,7 @@ i18n
                     saveBtn: 'Save',
                     themeLight: 'Light',
                     themeDark: 'Dark',
-
+                    preview: 'Preview',
                 },
             },
             sk: {
@@ -53,6 +53,7 @@ i18n
                     saveBtn: 'Uložiť',
                     themeLight: 'Svetlá',
                     themeDark: 'Tmavá',
+                    preview: 'Náhľad',
                 },
             },
         },
