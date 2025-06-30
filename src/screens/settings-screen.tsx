@@ -1,4 +1,4 @@
-import { useAppOwner, useQuery, useEvolu } from "@evolu/react";
+import { useAppOwner, useEvolu } from "@evolu/react";
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, FormControl, FormLabel, Grid, IconButton, InputAdornment, InputLabel, MenuItem, OutlinedInput, Paper, Select, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { useContext, useState } from "react";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -9,9 +9,16 @@ import { QuestionDialog } from "../components/dialog";
 import { useTranslation } from "react-i18next";
 import { ThemeContext } from "../context/ThemeContext";
 import { ThemeMode } from "../themes";
-import { Label } from "@mui/icons-material";
 import { useUnit } from "../context/UnitContext";
-import { AreaUnit } from "src/utils/unitConversion";
+import { AreaUnit } from "../utils/unitConversion";
+import AreaUnitInput from "../components/AreaUnitInput";
+import React from "react";
+
+interface Snapshot {
+    mode: ThemeMode;
+    unit: AreaUnit;
+    language: string;
+  }
 
 export const SettingsScreen: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -20,20 +27,25 @@ export const SettingsScreen: React.FC = () => {
     const [isResetAppOwnerDialogOpen, setResetAppOwnerDialogOpen] = useState(false);
     const [isImportAppOwnerDialogOpen, setImportAppOwnerDialogOpen] = useState(false);
 
-    let language = i18n.language || 'sk';
+    const [language, setLanguage] = useState<string>(i18n.language || 'sk');
 
-    const { mode, setTheme } = useContext(ThemeContext);
-    const [theme, setThemeChoice] = useState<ThemeMode>(mode)
+    const { mode, setTheme, storeTheme } = useContext(ThemeContext);
 
     const [showMnemonic, setShowMnemonic] = useState<boolean>(false);
 
-    const { unit, setAreaUnit } = useUnit();
+    const { unit, setAreaUnit, storeAreaUnit } = useUnit();
     
-    const [areaUnitHolder, setAreaUnitHolder] = useState<AreaUnit>(unit);
+    const handleAreaUnitChange = (event: React.MouseEvent<HTMLElement>, newUnit: string | null) => {
+        if (newUnit) setAreaUnit(newUnit as any);
+    };
 
-        const handleAreaUnitChange = (event: React.MouseEvent<HTMLElement>, newUnit: string | null) => {
-            if (newUnit) setAreaUnitHolder(newUnit as any);
-        };
+    const [areaInM2, setAreaInM2] = useState(10263); // stored in base unit
+
+    const [snapshot, setSnapshot] = useState<Snapshot>({
+        language: language,
+        mode: mode,
+        unit: unit
+    });
 
     return (
         <div>
@@ -44,7 +56,7 @@ export const SettingsScreen: React.FC = () => {
                     label={t('language')}
                     fullWidth
                     defaultValue={language}
-                    onChange={(e) => language = e.target.value}
+                    onChange={(e) => setLanguage(e.target.value)}
                 >
                     <MenuItem value="en">En</MenuItem>
                     <MenuItem value="sk">Sk</MenuItem>
@@ -54,7 +66,8 @@ export const SettingsScreen: React.FC = () => {
                     label={t('theme')}
                     fullWidth
                     defaultValue={mode}
-                    onChange={(e) => setThemeChoice(e.target.value === 'light' ? 'light' : 'dark')}
+                    value={mode}
+                    onChange={(e) => setTheme(e.target.value === 'light' ? 'light' : 'dark')}
                 >
                     <MenuItem value="light">{t('themeLight')}</MenuItem>
                     <MenuItem value="dark">{t('themeDark')}</MenuItem>
@@ -62,21 +75,33 @@ export const SettingsScreen: React.FC = () => {
 
                 <Box display="flex" flexDirection="row" gap={2} alignItems="center">
                     <Typography variant="body1" sx={{ whiteSpace: 'nowrap' }}>{t('unitSelectionLabel')}</Typography>
-                    <ToggleButtonGroup value={areaUnitHolder} exclusive onChange={handleAreaUnitChange} size="large" fullWidth>
+                    <ToggleButtonGroup value={unit} exclusive onChange={handleAreaUnitChange} size="large" fullWidth>
                         <ToggleButton value="m2">m²</ToggleButton>
                         <ToggleButton value="km2">km²</ToggleButton>
                         <ToggleButton value="ha">ha</ToggleButton>
                     </ToggleButtonGroup>
                 </Box>
+                <AreaUnitInput label='Visualization' baseValue={areaInM2} onBaseValueChange={setAreaInM2} fullWidth disabled />
                 <Grid container spacing={2}>
                     <Grid size={6}>
-                        <Button fullWidth>{t('cancelBtn')}</Button>
+                        <Button fullWidth onClick={() => {
+                            setTheme(snapshot.mode);
+                            setAreaUnit(snapshot.unit);
+                            setLanguage(snapshot.language);
+                            // Language does not implement live change on click.
+                        }}>{t('cancelBtn')}</Button>
                     </Grid>
                     <Grid size={6}>
                         <Button fullWidth onClick={() => {
                             i18n.changeLanguage(language);
-                            setTheme(theme);
-                            if (areaUnitHolder) setAreaUnit(areaUnitHolder as any);
+                            storeTheme(mode);
+                            if (unit) storeAreaUnit(unit as any);
+
+                            setSnapshot({
+                                language: language,
+                                mode: mode,
+                                unit: unit
+                            })
                         }}>{t('saveBtn')}</Button>
                     </Grid>
                 </Grid>

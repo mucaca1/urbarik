@@ -5,6 +5,7 @@ type AreaUnit = 'm2' | 'km2' | 'ha';
 interface UnitContextProps {
     unit: AreaUnit;
     setAreaUnit: (unit: AreaUnit) => void;
+    storeAreaUnit: (unit: AreaUnit) => void;
 }
 
 const UnitContext = createContext<UnitContextProps | undefined>(undefined);
@@ -22,11 +23,15 @@ export const UnitProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const setAreaUnit = (newMode: AreaUnit) => {
         console.log('Area unit changed')
         setUnit(newMode);
+    };
+
+    const storeAreaUnit = (newMode: AreaUnit) => {
+        console.log('Area unit stored')
         localStorage.setItem('baseAreaUnit', newMode);
     };
 
     return (
-        <UnitContext.Provider value={{ unit, setAreaUnit }}>
+        <UnitContext.Provider value={{ unit, setAreaUnit, storeAreaUnit }}>
             {children}
         </UnitContext.Provider>
     );

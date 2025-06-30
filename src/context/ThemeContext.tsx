@@ -7,11 +7,13 @@ import { ThemeMode, lightTheme, darkTheme } from '../themes';
 interface ThemeContextType {
     mode: ThemeMode;
     setTheme: (mode: ThemeMode) => void;
+    storeTheme: (mode: ThemeMode) => void;
 }
 
 export const ThemeContext = createContext<ThemeContextType>({
     mode: 'light',
     setTheme: () => { },
+    storeTheme: () => { },
 });
 
 interface Props {
@@ -31,13 +33,17 @@ export const ThemeProvider: React.FC<Props> = ({ children }) => {
     const setTheme = (newMode: ThemeMode) => {
         console.log('Theme changed')
         setMode(newMode);
+    };
+
+    const storeTheme = (newMode: ThemeMode) => {
+        console.log('Theme saved')
         localStorage.setItem('theme', newMode);
     };
 
     const theme = useMemo(() => (mode === 'light' ? lightTheme : darkTheme), [mode]);
 
     return (
-        <ThemeContext.Provider value={{ mode, setTheme }}>
+        <ThemeContext.Provider value={{ mode, setTheme, storeTheme }}>
             <MuiThemeProvider theme={theme}>
                 <CssBaseline />
                 {children}
