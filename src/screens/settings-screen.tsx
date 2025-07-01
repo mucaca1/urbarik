@@ -61,9 +61,29 @@ export const SettingsScreen: React.FC = () => {
                     <MenuItem value="dark">{t('themeDark')}</MenuItem>
                 </TextField>
 
-                <Box display="flex" flexDirection="row" gap={2} alignItems="center">
-                    <Typography variant="body1" sx={{ whiteSpace: 'nowrap' }}>{t('unitSelectionLabel')}</Typography>
-                    <ToggleButtonGroup value={unit} exclusive onChange={handleAreaUnitChange} size="large" fullWidth>
+                <Box
+                    display="flex"
+                    flexDirection={{ xs: 'column', sm: 'row' }}
+                    gap={2}
+                    alignItems={{ xs: 'stretch', sm: 'center' }}
+                >
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            whiteSpace: 'nowrap',
+                            textAlign: { xs: 'left', sm: 'inherit' },
+                        }}
+                    >
+                        {t('unitSelectionLabel')}
+                    </Typography>
+
+                    <ToggleButtonGroup
+                        value={unit}
+                        exclusive
+                        onChange={handleAreaUnitChange}
+                        size="large"
+                        fullWidth={true}
+                    >
                         <ToggleButton value="m2">m²</ToggleButton>
                         <ToggleButton value="a">a</ToggleButton>
                         <ToggleButton value="ha">ha</ToggleButton>

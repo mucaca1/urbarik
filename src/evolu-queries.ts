@@ -9,7 +9,7 @@ const queryOptions = {
 
 export const getAllSubjectsQuery = evolu.createQuery((db) =>
     db.selectFrom("subject")
-        .select(["id", "name", "surname"])
+        .select(["id", "firstName", "lastName", "nationalIdNumber"])
         .where("isDeleted", "is not", 1)
         .select((eb) => [
             kysely.jsonObjectFrom(

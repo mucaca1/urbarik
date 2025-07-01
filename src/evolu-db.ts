@@ -1,3 +1,5 @@
+import { string } from "@effect/schema/FastCheck";
+import { NonNaNTypeId } from "@effect/schema/Schema";
 import {
     createEvolu,
     getOrThrow,
@@ -5,7 +7,10 @@ import {
     Int,
     maxLength,
     NonEmptyString,
+    NonNegativeInt,
+    NonNegativeNumber,
     nullOr,
+    PositiveNumber,
     SimpleName
 } from "@evolu/common";
 import { evoluReactWebDeps } from "@evolu/react-web";
@@ -16,26 +21,48 @@ type TSubjectId = typeof SubjectId.Type;
 const AddressId = id("AddressId");
 type TAddressId = typeof AddressId.Type;
 
+const LandPartId = id("LandPartId");
+type TLandPartId = typeof LandPartId.Type;
+
+const LandOwnershipId = id("LandOwnershipId");
+type TLandOwnershipId = typeof LandOwnershipId.Type;
+
 const NonEmptyString50 = maxLength(50)(NonEmptyString);
 type TNonEmptyString50 = typeof NonEmptyString50.Type;
 
 const Subject = {
     id: SubjectId,
-    name: NonEmptyString50,
-    surname: NonEmptyString50,
+    firstName: NonEmptyString50,
+    lastName: NonEmptyString50,
+    nationalIdNumber: NonEmptyString,
     addressId: nullOr(AddressId)
 };
 
 const Address = {
     id: AddressId,
     street: NonEmptyString50,
-    postCode: Int,
+    postCode: NonNegativeInt,
     city: NonEmptyString50
+}
+
+const LandPart = {
+    id: LandPartId,
+    certificateOfOwnership: NonEmptyString50,
+    plotDimensions: NonNegativeNumber
+}
+
+const LandOwnership = {
+    id: LandOwnershipId,
+    subjectId: SubjectId,
+    landPartId: LandPartId,
+    share: PositiveNumber
 }
 
 const Schema = {
     subject: Subject,
-    address: Address
+    address: Address,
+    landPart: LandPart,
+    landOwnership: LandOwnership
 };
 
 export const evolu = createEvolu(evoluReactWebDeps)(Schema, {
@@ -53,7 +80,7 @@ export const evolu = createEvolu(evoluReactWebDeps)(Schema, {
         })
         if (address.ok) {
             evolu.insert('subject', {
-                name: "Matej", surname: "Mrkva", addressId: address.value.id
+                firstName: "Matej", lastName: "Mrkva", addressId: address.value.id, nationalIdNumber: "EC123GH5"
             });
         }
     },
