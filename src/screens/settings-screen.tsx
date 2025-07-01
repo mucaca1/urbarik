@@ -65,8 +65,9 @@ export const SettingsScreen: React.FC = () => {
                     <Typography variant="body1" sx={{ whiteSpace: 'nowrap' }}>{t('unitSelectionLabel')}</Typography>
                     <ToggleButtonGroup value={unit} exclusive onChange={handleAreaUnitChange} size="large" fullWidth>
                         <ToggleButton value="m2">m²</ToggleButton>
-                        <ToggleButton value="km2">km²</ToggleButton>
+                        <ToggleButton value="a">a</ToggleButton>
                         <ToggleButton value="ha">ha</ToggleButton>
+                        <ToggleButton value="km2">km²</ToggleButton>
                     </ToggleButtonGroup>
                 </Box>
                 <AreaUnitInput label={t('preview')} baseValue={areaInM2} onBaseValueChange={setAreaInM2} fullWidth disabled />
