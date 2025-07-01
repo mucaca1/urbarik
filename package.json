@@ -46,6 +46,7 @@
     "@evolu/react-web": "^1.0.1-preview.2",
     "@mui/icons-material": "^7.1.2",
     "@mui/material": "^7.1.2",
+    "@mui/x-data-grid": "^8.6.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.5.2",

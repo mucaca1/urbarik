@@ -6,7 +6,7 @@ import {
 import { memo, Suspense } from "react";
 import { evolu } from "./evolu-db";
 import { SettingsScreen } from "./screens/settings-screen";
-import MenuBar from "./components/menu";
+import MenuBar from "./components/MenuBar";
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { HomeScreen } from "./screens/home-screen";
 import { ThemeProvider } from "./context/ThemeContext";

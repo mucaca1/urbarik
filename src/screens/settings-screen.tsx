@@ -5,7 +5,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { QuestionDialog } from "../components/dialog";
+import { QuestionDialog } from "../components/QuestionDialog";
 import { useTranslation } from "react-i18next";
 import { ThemeContext } from "../context/ThemeContext";
 import { ThemeMode } from "../themes";
