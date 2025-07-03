@@ -2,7 +2,6 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextFie
 import { Transition } from "../utils/transition";
 import { useEvolu } from "@evolu/react";
 import { notifyError, notifySuccess } from "../utils/toastNotification";
-import { getSubjectQuery } from "../evolu-queries";
 import { TSubjectId } from "../evolu-db";
 import { ToastContainer } from "react-toastify";
 
@@ -17,7 +16,7 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showAddSubject
     const { insert } = useEvolu();
 
     if (subjectId) {
-        getSubjectQuery(subjectId)
+        //getSubjectQuery(subjectId)
     }
     
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
