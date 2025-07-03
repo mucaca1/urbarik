@@ -1,6 +1,7 @@
 import { evolu } from "./evolu-db";
 import { Subject } from "@mui/icons-material";
-import { kysely } from "@evolu/common";
+import { err, kysely, ok } from "@evolu/common";
+import { TSubjectId } from "./evolu-db"
 
 const queryOptions = {
     logQueryExecutionTime: process.env.NODE_ENV === "development",
@@ -9,17 +10,20 @@ const queryOptions = {
 
 export const getAllSubjectsQuery = evolu.createQuery((db) =>
     db.selectFrom("subject")
-        .select(["id", "firstName", "lastName", "nationalIdNumber"])
-        .where("isDeleted", "is not", 1)
-        .select((eb) => [
-            kysely.jsonObjectFrom(
-                eb.selectFrom("address")
-                .select(["city", "postCode", "street"])
-                .where("isDeleted", "is not", 1)
-                .whereRef("id", "=", "subject.addressId")
-            )
-                .as("address")
-        ]), queryOptions,
+        .select(["id", "firstName", "lastName", "nationalIdNumber", "street", "houseNumber", "postCode", "city"])
+        .where("isDeleted", "is not", 1), queryOptions,
 );
-
 export type TAllSubjectsRow = typeof getAllSubjectsQuery.Row;
+
+const getSubjectQuery = (subjectId: TSubjectId) => 
+    evolu.createQuery((db) =>
+        db.selectFrom("subject")
+            .select(["id", "firstName", "lastName", "nationalIdNumber", "street", "houseNumber", "postCode", "city"])
+            .where("isDeleted", "is not", 1)
+            .where("id", "=", subjectId).limit(1), queryOptions,
+    );
+
+export const getSubject = async (subjectId: TSubjectId) => {
+    const subjectRows = await evolu.loadQuery(getSubjectQuery(subjectId));
+    return ok({ subjectRows })
+}

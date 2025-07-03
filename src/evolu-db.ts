@@ -16,10 +16,7 @@ import {
 import { evoluReactWebDeps } from "@evolu/react-web";
 
 const SubjectId = id("SubjectId");
-type TSubjectId = typeof SubjectId.Type;
-
-const AddressId = id("AddressId");
-type TAddressId = typeof AddressId.Type;
+export type TSubjectId = typeof SubjectId.Type;
 
 const LandPartId = id("LandPartId");
 type TLandPartId = typeof LandPartId.Type;
@@ -30,20 +27,18 @@ type TLandOwnershipId = typeof LandOwnershipId.Type;
 const NonEmptyString50 = maxLength(50)(NonEmptyString);
 type TNonEmptyString50 = typeof NonEmptyString50.Type;
 
-const Subject = {
+export const Subject = {
     id: SubjectId,
     firstName: NonEmptyString50,
     lastName: NonEmptyString50,
     nationalIdNumber: NonEmptyString,
-    addressId: nullOr(AddressId)
-};
 
-const Address = {
-    id: AddressId,
-    street: NonEmptyString50,
-    postCode: NonNegativeInt,
-    city: NonEmptyString50
-}
+    // # Address # //
+    street: nullOr(NonEmptyString50),
+    houseNumber: nullOr(NonEmptyString50),
+    postCode: nullOr(NonNegativeInt),
+    city: nullOr(NonEmptyString50)
+};
 
 const LandPart = {
     id: LandPartId,
@@ -60,7 +55,6 @@ const LandOwnership = {
 
 const Schema = {
     subject: Subject,
-    address: Address,
     landPart: LandPart,
     landOwnership: LandOwnership
 };
@@ -75,14 +69,9 @@ export const evolu = createEvolu(evoluReactWebDeps)(Schema, {
 
     initialData: (evolu) => {
         console.log("Init data")
-        const address = evolu.insert('address', {
-            city: "Trenčín", postCode: 91101, street: "Bojnicnká"
-        })
-        if (address.ok) {
             evolu.insert('subject', {
-                firstName: "Matej", lastName: "Mrkva", addressId: address.value.id, nationalIdNumber: "EC123GH5"
+                firstName: "Matej", lastName: "Mrkva", nationalIdNumber: "EC123GH5", street: "Beckovksa", houseNumber: "4578/1", postCode: 91101, city: "Trencin"
             });
-        }
     },
 
     indexes: (create) => [
