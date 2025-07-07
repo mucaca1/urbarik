@@ -1,7 +1,8 @@
 import { evolu } from "./evolu-db";
 import { Subject } from "@mui/icons-material";
-import { err, kysely, ok } from "@evolu/common";
+import { err, kysely, ok, QueryRows } from "@evolu/common";
 import { TSubjectId } from "./evolu-db"
+import { useQuery } from "@evolu/react";
 
 const queryOptions = {
     logQueryExecutionTime: process.env.NODE_ENV === "development",
@@ -23,7 +24,9 @@ const getSubjectQuery = (subjectId: TSubjectId) =>
             .where("id", "=", subjectId).limit(1), queryOptions,
     );
 
+type TGetSubjectRow = ReturnType<typeof getSubjectQuery>[number];
+
 export const getSubject = async (subjectId: TSubjectId) => {
-    const subjectRows = await evolu.loadQuery(getSubjectQuery(subjectId));
-    return ok({ subjectRows })
+    const subjectRows: QueryRows = await evolu.loadQuery(getSubjectQuery(subjectId));
+    return subjectRows
 }

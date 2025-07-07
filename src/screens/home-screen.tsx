@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { DataGrid, GridCallbackDetails, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormGroup, Paper, Slide, TextField, Typography } from "@mui/material";
-import { getAllSubjectsQuery, TAllSubjectsRow } from "../evolu-queries";
+import { getAllSubjectsQuery, getSubject, TAllSubjectsRow } from "../evolu-queries";
 import { useEvolu, useQuery } from "@evolu/react";
 import { QueryRows, Row } from "@evolu/common";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -26,13 +26,13 @@ export const HomeScreen: React.FC = () => {
     const [showAddSubject, setShowAddSubject] = useState(false);
 
     const subjects: QueryRows<TAllSubjectsRow> = useQuery(getAllSubjectsQuery);
-    const rows = subjects.map((row) => (
+    const rows = subjects.map((row: TAllSubjectsRow) => (
         {
-            id: row.id, 
+            id: row.id,
             lastName: row.lastName, 
             firstName: row.firstName,
             identityCard: row.nationalIdNumber,
-            address: (`${row.street} ${row.houseNumber} ${row.postCode}, ${row.city}`)
+            address: (`${row.street || ""} ${row.houseNumber || ""} ${row.postCode || ""} ${row.city || ""}`)
         }
     ));
 
@@ -41,6 +41,7 @@ export const HomeScreen: React.FC = () => {
             <SubjectEditor
                 subjectId={selectedSubject}
                 showAddSubject={showAddSubject}
+                createNew={!selectedSubject}
                 setShowAddSubject={setShowAddSubject}
             />
             <h1>{t('home')}</h1>

@@ -1,40 +1,81 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
 import { Transition } from "../utils/transition";
-import { useEvolu } from "@evolu/react";
+import { useEvolu, useQuery } from "@evolu/react";
 import { notifyError, notifySuccess } from "../utils/toastNotification";
 import { TSubjectId } from "../evolu-db";
 import { ToastContainer } from "react-toastify";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { getSubject } from "../evolu-queries";
+import { useEffect, useState } from "react";
 
 interface SubjectEditorProps {
     subjectId: TSubjectId | null,
     showAddSubject: boolean,
+    createNew: boolean,
     setShowAddSubject: (v: boolean) => void,
 }
 
-const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showAddSubject, setShowAddSubject }) => {
+interface FormValues {
+    firstName: string;
+    lastName: string;
+    nationalIdentificationNumber: string;
+    street: string;
+    houseNumber: string;
+    postcode: number | string | undefined;
+    city: string;
+  }
 
+const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showAddSubject, createNew, setShowAddSubject }) => {
     const { insert } = useEvolu();
 
-    if (subjectId) {
-        //getSubjectQuery(subjectId)
-    }
-    
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        const formJson = Object.fromEntries((formData as any).entries());
-        const firstName = formJson.firstName;
-        const lastName = formJson.lastName;
-        const nationalIdentificationNumber = formJson.nationalIdentificationNumber;
+    const {
+        control,
+        handleSubmit,
+        reset,
+        setValue,
+        resetField
+    } = useForm<FormValues>({
+        defaultValues: {
+            firstName: '',
+            lastName: '',
+            nationalIdentificationNumber: '',
+            street: '',
+            houseNumber: '',
+            postcode: '',
+            city: ''
+        }
+    });
 
-        const street = formJson.street;
-        const houseNumber = formJson.houseNumber;
-        const postcode = formJson.postcode;
-        const city = formJson.city;
+    if (!createNew && subjectId) {
+        getSubject(subjectId).then((result) => {
+                const subject = result[0];
+                if (subject) {
+                    setValue('firstName', subject.firstName as string);
+                    setValue('lastName', subject.lastName as string);
+                    setValue('nationalIdentificationNumber', subject.nationalIdNumber as string);
+                    setValue('street', subject.street as string || '');
+                    setValue('houseNumber', subject.houseNumber as string || '');
+                    setValue('postcode', subject.postCode as number || '');
+                    setValue('city', subject.city as string || '');
+                } else {
+                    notifyError("Subject not found");
+                }
+            console.log("Fetched subject:", result);
+        }).catch((error) => {
+            console.error("Error fetching subject:", error);
+            notifyError("Failed to fetch subject data");
+        });
+    }
+
+    const onSubmit: SubmitHandler<FormValues> = (data) => {
+        const street = nullEmptyValue(data.street);
+        const houseNumber = nullEmptyValue(data.houseNumber);
+        const postcode = data.postcode;
+        const city = nullEmptyValue(data.city);
 
         const subjectInsertResult = insert('subject', {
-            firstName: firstName, lastName: lastName, nationalIdNumber: nationalIdentificationNumber,
-            street: street, houseNumber: houseNumber, postCode: Number.parseInt(postcode), city: city
+            firstName: data.firstName, lastName: data.lastName, nationalIdNumber: data.nationalIdentificationNumber,
+            street: street, houseNumber: houseNumber, postCode: postcode !== undefined ? postcode : null, city: city
         })
 
         if (subjectInsertResult.ok) {
@@ -42,8 +83,11 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showAddSubject
         } else {
             notifyError("Stored failed");
         }
+
+        reset();
         setShowAddSubject(false);
-    };
+      };
+
 
     return (<div>
         <ToastContainer />
@@ -60,35 +104,93 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showAddSubject
             <DialogTitle id="scroll-dialog-title">{"Add subject"}</DialogTitle>
 
             <DialogContent>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <Box
                         display="flex"
                         flexDirection={{ xs: 'column', sm: 'column' }}
                         gap={2}
-                        paddingTop={"5%"}
+                        paddingTop="5%"
                     >
-                        <TextField id="firstName" name="firstName" label="First name"></TextField>
-                        <TextField id="lastName" name="lastName" label="Last name"></TextField>
-                        <TextField id="nationalIdentificationNumber" name="nationalIdentificationNumber" label="National identification number"></TextField>
+                        <Controller
+                            name="firstName"
+                            control={control}
+                            render={({ field }) => (
+                                <TextField {...field} label="First name" fullWidth />
+                            )}
+                        />
+                        <Controller
+                            name="lastName"
+                            control={control}
+                            render={({ field }) => (
+                                <TextField {...field} label="Last name" fullWidth />
+                            )}
+                        />
+                        <Controller
+                            name="nationalIdentificationNumber"
+                            control={control}
+                            render={({ field }) => (
+                                <TextField
+                                    {...field}
+                                    label="National identification number"
+                                    fullWidth
+                                />
+                            )}
+                        />
 
-                        <Typography variant="h6">
-                            Address
-                        </Typography>
-                        <TextField id="street" name="street" label="Street"></TextField>
-                        <TextField id="houseNumber" name="houseNumber" label="House number"></TextField>
-                        <TextField id="postcode" name="postcode" label="Postcode" type="number"></TextField>
-                        <TextField id="city" name="city" label="City"></TextField>
+                        <Typography variant="h6">Address</Typography>
 
+                        <Controller
+                            name="street"
+                            control={control}
+                            render={({ field }) => (
+                                <TextField {...field} label="Street" fullWidth />
+                            )}
+                        />
+                        <Controller
+                            name="houseNumber"
+                            control={control}
+                            render={({ field }) => (
+                                <TextField {...field} label="House number" fullWidth />
+                            )}
+                        />
+                        <Controller
+                            name="postcode"
+                            control={control}
+                            render={({ field }) => (
+                                <TextField
+                                    {...field}
+                                    label="Postcode"
+                                    type="number"
+                                    fullWidth
+                                />
+                            )}
+                        />
+                        <Controller
+                            name="city"
+                            control={control}
+                            render={({ field }) => (
+                                <TextField {...field} label="City" fullWidth />
+                            )}
+                        />
                     </Box>
 
                     <DialogActions>
                         <Button onClick={() => setShowAddSubject(false)}>Cancel</Button>
-                        <Button type="submit">Save</Button>
+                        <Button type="submit" variant="contained">
+                            Save
+                        </Button>
                     </DialogActions>
                 </form>
             </DialogContent>
         </Dialog>
     </div>);
+}
+
+const nullEmptyValue = (value: string): string | null => {
+    if (value === "") {
+        return null;
+    }
+    return value;
 }
 
 export default SubjectEditor;

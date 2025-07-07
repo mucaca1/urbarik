@@ -31,7 +31,7 @@ export const Subject = {
     id: SubjectId,
     firstName: NonEmptyString50,
     lastName: NonEmptyString50,
-    nationalIdNumber: NonEmptyString,
+    nationalIdNumber: NonEmptyString50,
 
     // # Address # //
     street: nullOr(NonEmptyString50),
