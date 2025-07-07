@@ -12,6 +12,7 @@ import { toast, ToastContainer, ToastOptions } from "react-toastify";
 import EditIcon from '@mui/icons-material/Edit';
 import SubjectEditor from "../components/SubjectEditor";
 import { TSubjectId } from "../evolu-db";
+import { EditorType } from "src/types";
 
 const subjectColumns: GridColDef[] = [
     { field: 'firstName', headerName: 'First name', width: 250},
@@ -23,7 +24,7 @@ const subjectColumns: GridColDef[] = [
 export const HomeScreen: React.FC = () => {
     const {t} = useTranslation();
     const [selectedSubject, setSelectedSubject] = useState<TSubjectId | null>(null);
-    const [showAddSubject, setShowAddSubject] = useState(false);
+    const [subjectEditor, setSubjectEditor] = useState<{visible: boolean, editorType: EditorType | null}>({visible: false, editorType: null});
 
     const subjects: QueryRows<TAllSubjectsRow> = useQuery(getAllSubjectsQuery);
     const rows = subjects.map((row: TAllSubjectsRow) => (
@@ -36,17 +37,21 @@ export const HomeScreen: React.FC = () => {
         }
     ));
 
+    const setShowAddSubject = (show: boolean, editorType?: EditorType) => {
+        setSubjectEditor({ visible: show, editorType: editorType ? editorType : null });
+    }
+
     return (
         <div>
-            <SubjectEditor
+            {subjectEditor.visible && <SubjectEditor
                 subjectId={selectedSubject}
-                showAddSubject={showAddSubject}
-                createNew={!selectedSubject}
-                setShowAddSubject={setShowAddSubject}
-            />
+                showDialog={subjectEditor.visible}
+                type={subjectEditor.editorType}
+                setShowDialog={setShowAddSubject}
+            />}
             <h1>{t('home')}</h1>
-            <Button onClick={() => setShowAddSubject(true)}><PersonAddIcon/> Add subject</Button>
-            {selectedSubject && <Button onClick={() => setShowAddSubject(true)}><EditIcon /> Edit subject</Button>}
+            <Button onClick={() => setShowAddSubject(true, "create")}><PersonAddIcon/> Add subject</Button>
+            {selectedSubject && <Button onClick={() => setShowAddSubject(true, "edit")}><EditIcon /> Edit subject</Button>}
             <Box sx={{ height: 600, width: '100%' }}>
                 <DataGrid
                     rows={rows}

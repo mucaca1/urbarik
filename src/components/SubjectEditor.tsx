@@ -7,12 +7,13 @@ import { ToastContainer } from "react-toastify";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { getSubject } from "../evolu-queries";
 import { useEffect, useState } from "react";
+import { EditorType } from "../types";
 
 interface SubjectEditorProps {
     subjectId: TSubjectId | null,
-    showAddSubject: boolean,
-    createNew: boolean,
-    setShowAddSubject: (v: boolean) => void,
+    showDialog: boolean,
+    type: EditorType | null,
+    setShowDialog: (v: boolean) => void,
 }
 
 interface FormValues {
@@ -25,15 +26,18 @@ interface FormValues {
     city: string;
   }
 
-const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showAddSubject, createNew, setShowAddSubject }) => {
+const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, type, setShowDialog }) => {
+    if (type === null) {
+        return <div>No editor type specified!</div>;
+    }
+    
     const { insert } = useEvolu();
 
     const {
         control,
         handleSubmit,
         reset,
-        setValue,
-        resetField
+        setValue
     } = useForm<FormValues>({
         defaultValues: {
             firstName: '',
@@ -46,7 +50,7 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showAddSubject
         }
     });
 
-    if (!createNew && subjectId) {
+    if (type === "edit" && subjectId) {
         getSubject(subjectId).then((result) => {
                 const subject = result[0];
                 if (subject) {
@@ -85,20 +89,20 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showAddSubject
         }
 
         reset();
-        setShowAddSubject(false);
+        setShowDialog(false);
       };
 
 
     return (<div>
         <ToastContainer />
         <Dialog
-            open={showAddSubject}
+            open={showDialog}
             aria-labelledby="scroll-dialog-title"
             slots={{
                 transition: Transition,
             }}
             keepMounted
-            onClose={() => setShowAddSubject(false)}
+            onClose={() => setShowDialog(false)}
             aria-describedby="alert-dialog-slide-description"
         >
             <DialogTitle id="scroll-dialog-title">{"Add subject"}</DialogTitle>
@@ -175,7 +179,7 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showAddSubject
                     </Box>
 
                     <DialogActions>
-                        <Button onClick={() => setShowAddSubject(false)}>Cancel</Button>
+                        <Button onClick={() => setShowDialog(false)}>Cancel</Button>
                         <Button type="submit" variant="contained">
                             Save
                         </Button>
