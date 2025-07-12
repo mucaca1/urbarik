@@ -6,18 +6,21 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AddHomeWorkIcon from '@mui/icons-material/AddHomeWork';
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import EditIcon from '@mui/icons-material/Edit';
-import { TSubjectId } from '../evolu-db';
+import { TSubjectId, TLandPartId, TLandOwnershipId } from '../evolu-db';
 import { EditorType } from '../types';
 import SubjectEditor from './SubjectEditor';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 interface EditorOptionsButtonBarProps {
-    subjectId: TSubjectId | null
-    // Add other ids as needed, e.g. landPartId, ownershipId
+    subjectId: TSubjectId | null,
+    landPartId: TLandPartId | null,
+    ownershipId: TLandOwnershipId | null,
 }
 
 const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({subjectId}) => {
     const [subjectEditor, setSubjectEditor] = useState<{visible: boolean, editorType: EditorType | null}>({visible: false, editorType: null});
+    const [landPartEditor, setLandPartEditor] = useState<{ visible: boolean, editorType: EditorType | null }>({ visible: false, editorType: null });
+    const [ownershipEditor, setOwnershipEditor] = useState<{ visible: boolean, editorType: EditorType | null }>({ visible: false, editorType: null });
     const [addOpen, setAddOpen] = useState<boolean>(false);
     const [modifyOpen, setModifyOpen] = useState<boolean>(false);
 

@@ -83,8 +83,10 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ty
         })
 
         if (subjectInsertResult.ok) {
+            console.log("Subject stored successfully:", subjectInsertResult);
             notifySuccess("Successfully stored");
         } else {
+            console.error("Error storing subject:", subjectInsertResult);
             notifyError("Stored failed");
         }
 

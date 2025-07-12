@@ -43,7 +43,7 @@ export const HomeScreen: React.FC = () => {
     return (
         <div>
             <h1>{t('home')}</h1>
-            <AddOptionsButton subjectId={selectedSubject}/>
+            <AddOptionsButton subjectId={selectedSubject} landPartId={null} ownershipId={null}/>
             <ToggleButtonGroup
                     exclusive
                     size="large"

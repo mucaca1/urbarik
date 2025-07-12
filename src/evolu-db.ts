@@ -19,10 +19,10 @@ const SubjectId = id("SubjectId");
 export type TSubjectId = typeof SubjectId.Type;
 
 const LandPartId = id("LandPartId");
-type TLandPartId = typeof LandPartId.Type;
+export type TLandPartId = typeof LandPartId.Type;
 
 const LandOwnershipId = id("LandOwnershipId");
-type TLandOwnershipId = typeof LandOwnershipId.Type;
+export type TLandOwnershipId = typeof LandOwnershipId.Type;
 
 const NonEmptyString50 = maxLength(50)(NonEmptyString);
 type TNonEmptyString50 = typeof NonEmptyString50.Type;
