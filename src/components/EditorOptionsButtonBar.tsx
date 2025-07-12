@@ -25,7 +25,7 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({subjectI
     const [modifyOpen, setModifyOpen] = useState<boolean>(false);
 
     useEffect(() => {
-        setModifyOpen(subjectId !== undefined);
+        setModifyOpen(subjectId !== null);
     }, [subjectId]);
 
     const handleToggle = () => {
@@ -38,12 +38,12 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({subjectI
 
     return (
         <div>
-            {subjectEditor.visible && <SubjectEditor
+            <SubjectEditor
                 subjectId={subjectId}
                 showDialog={subjectEditor.visible}
                 type={subjectEditor.editorType}
                 setShowDialog={setShowAddSubject}
-            />}
+            />
             <Box
                 sx={{
                     gap: 2,

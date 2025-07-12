@@ -8,6 +8,7 @@ import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { getSubject } from "../evolu-queries";
 import { useEffect, useState } from "react";
 import { EditorType } from "../types";
+import { Int } from "@evolu/common";
 
 interface SubjectEditorProps {
     subjectId: TSubjectId | null,
@@ -22,15 +23,11 @@ interface FormValues {
     nationalIdentificationNumber: string;
     street: string;
     houseNumber: string;
-    postcode: number | string | undefined;
+    postcode: string;
     city: string;
-  }
+}
 
 const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, type, setShowDialog }) => {
-    if (type === null) {
-        return <div>No editor type specified!</div>;
-    }
-    
     const { insert } = useEvolu();
 
     const {
@@ -50,6 +47,18 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ty
         }
     });
 
+    // Reset form values based on type
+    if (type === "create") {
+        setValue('firstName', '');
+        setValue('lastName', '');
+        setValue('nationalIdentificationNumber', '');
+        setValue('street', '');
+        setValue('houseNumber', '');
+        setValue('postcode', '');
+        setValue('city', '');
+    }
+
+    // Fetch subject data if editing
     if (type === "edit" && subjectId) {
         getSubject(subjectId).then((result) => {
                 const subject = result[0];
@@ -59,7 +68,7 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ty
                     setValue('nationalIdentificationNumber', subject.nationalIdNumber as string);
                     setValue('street', subject.street as string || '');
                     setValue('houseNumber', subject.houseNumber as string || '');
-                    setValue('postcode', subject.postCode as number || '');
+                    setValue('postcode', subject.postCode as string || '');
                     setValue('city', subject.city as string || '');
                 } else {
                     notifyError("Subject not found");
@@ -74,24 +83,26 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ty
     const onSubmit: SubmitHandler<FormValues> = (data) => {
         const street = nullEmptyValue(data.street);
         const houseNumber = nullEmptyValue(data.houseNumber);
-        const postcode = data.postcode;
+        let postcode = nullEmptyValue(data.postcode);
+        if (postcode === null) {
+            postcode = '';
+        }
         const city = nullEmptyValue(data.city);
 
         const subjectInsertResult = insert('subject', {
             firstName: data.firstName, lastName: data.lastName, nationalIdNumber: data.nationalIdentificationNumber,
-            street: street, houseNumber: houseNumber, postCode: postcode !== undefined ? postcode : null, city: city
+            street: street, houseNumber: houseNumber, postCode: postcode?.length > 0 ? Number.parseInt(postcode) : null, city: city
         })
 
         if (subjectInsertResult.ok) {
             console.log("Subject stored successfully:", subjectInsertResult);
             notifySuccess("Successfully stored");
+            reset();
+            setShowDialog(false);
         } else {
-            console.error("Error storing subject:", subjectInsertResult);
+            console.error("Error storing subject:", subjectInsertResult.error);
             notifyError("Stored failed");
         }
-
-        reset();
-        setShowDialog(false);
       };
 
 
@@ -107,7 +118,7 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ty
             onClose={() => setShowDialog(false)}
             aria-describedby="alert-dialog-slide-description"
         >
-            <DialogTitle id="scroll-dialog-title">{"Add subject"}</DialogTitle>
+            <DialogTitle id="scroll-dialog-title">{"Subject"}</DialogTitle>
 
             <DialogContent>
                 <form onSubmit={handleSubmit(onSubmit)}>

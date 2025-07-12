@@ -69,7 +69,11 @@ export const HomeScreen: React.FC = () => {
                     onRowSelectionModelChange={
                         (rowSelectionModel: GridRowSelectionModel) => {
                             const a = rowSelectionModel.ids.keys().next();
-                            setSelectedSubject(a.value as TSubjectId)
+                            if (a.value === undefined) {
+                                setSelectedSubject(null);
+                            } else {
+                                setSelectedSubject(a.value as TSubjectId);
+                            }
                         }
                     }
                 />
