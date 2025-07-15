@@ -4,7 +4,7 @@ type AreaUnit = 'm2' | 'km2' | 'ha';
 
 interface UnitContextProps {
     unit: AreaUnit;
-    unitAsString: (unit: AreaUnit) => JSX.Element;
+    unitAsString: (unit: AreaUnit) => string;
     setAreaUnit: (unit: AreaUnit) => void;
     storeAreaUnit: (unit: AreaUnit) => void;
 }
