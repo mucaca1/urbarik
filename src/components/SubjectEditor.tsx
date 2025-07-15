@@ -13,7 +13,7 @@ import { Int } from "@evolu/common";
 interface SubjectEditorProps {
     subjectId: TSubjectId | null,
     showDialog: boolean,
-    type: EditorType | null,
+    editorType: EditorType | null,
     setShowDialog: (v: boolean) => void,
 }
 
@@ -27,8 +27,8 @@ interface FormValues {
     city: string;
 }
 
-const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, type, setShowDialog }) => {
-    const { insert } = useEvolu();
+const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, editorType, setShowDialog }) => {
+    const { insert, update } = useEvolu();
 
     const {
         control,
@@ -48,7 +48,7 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ty
     });
 
     // Reset form values based on type
-    if (type === "create") {
+    if (editorType === "create") {
         setValue('firstName', '');
         setValue('lastName', '');
         setValue('nationalIdentificationNumber', '');
@@ -59,7 +59,7 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ty
     }
 
     // Fetch subject data if editing
-    if (type === "edit" && subjectId) {
+    if (editorType === "edit" && subjectId) {
         getSubject(subjectId).then((result) => {
                 const subject = result[0];
                 if (subject) {
@@ -84,24 +84,43 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ty
         const street = nullEmptyValue(data.street);
         const houseNumber = nullEmptyValue(data.houseNumber);
         let postcode = nullEmptyValue(data.postcode);
-        if (postcode === null) {
+        if (postcode === null || postcode === undefined) {
             postcode = '';
         }
         const city = nullEmptyValue(data.city);
 
-        const subjectInsertResult = insert('subject', {
-            firstName: data.firstName, lastName: data.lastName, nationalIdNumber: data.nationalIdentificationNumber,
-            street: street, houseNumber: houseNumber, postCode: postcode?.length > 0 ? Number.parseInt(postcode) : null, city: city
-        })
+        if (editorType === "edit" && subjectId) {
+            const subjectUpdateResult = update('subject', {
+                id: subjectId,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                nationalIdNumber: data.nationalIdentificationNumber, street: street, houseNumber: houseNumber, postCode: postcode?.length > 0 ? Number.parseInt(postcode) : null, city: city
+            });
+            if (subjectUpdateResult.ok) {
+                console.log("Subject updated successfully:", subjectUpdateResult);
+                notifySuccess("Successfully updated");
+                reset();
+                setShowDialog(false);
+            } else {
+                console.error("Error updating subject:", subjectUpdateResult.error);
+                notifyError("Update failed");
+            }
 
-        if (subjectInsertResult.ok) {
-            console.log("Subject stored successfully:", subjectInsertResult);
-            notifySuccess("Successfully stored");
-            reset();
-            setShowDialog(false);
-        } else {
-            console.error("Error storing subject:", subjectInsertResult.error);
-            notifyError("Stored failed");
+        } else if (editorType === "create") {
+            const subjectInsertResult = insert('subject', {
+                firstName: data.firstName, lastName: data.lastName, nationalIdNumber: data.nationalIdentificationNumber,
+                street: street, houseNumber: houseNumber, postCode: postcode?.length > 0 ? Number.parseInt(postcode) : null, city: city
+            })
+
+            if (subjectInsertResult.ok) {
+                console.log("Subject stored successfully:", subjectInsertResult);
+                notifySuccess("Successfully stored");
+                reset();
+                setShowDialog(false);
+            } else {
+                console.error("Error storing subject:", subjectInsertResult.error);
+                notifyError("Stored failed");
+            }
         }
       };
 
@@ -132,14 +151,14 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ty
                             name="firstName"
                             control={control}
                             render={({ field }) => (
-                                <TextField {...field} label="First name" fullWidth />
+                                <TextField {...field} label="First name" fullWidth required />
                             )}
                         />
                         <Controller
                             name="lastName"
                             control={control}
                             render={({ field }) => (
-                                <TextField {...field} label="Last name" fullWidth />
+                                <TextField {...field} label="Last name" fullWidth required />
                             )}
                         />
                         <Controller
@@ -150,6 +169,7 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ty
                                     {...field}
                                     label="National identification number"
                                     fullWidth
+                                    required
                                 />
                             )}
                         />

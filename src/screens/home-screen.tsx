@@ -10,7 +10,6 @@ import { TransitionProps } from "@mui/material/transitions";
 import { Padding } from "@mui/icons-material";
 import { toast, ToastContainer, ToastOptions } from "react-toastify";
 import EditIcon from '@mui/icons-material/Edit';
-import SubjectEditor from "../components/SubjectEditor";
 import { TSubjectId } from "../evolu-db";
 import { EditorType } from "src/types";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';

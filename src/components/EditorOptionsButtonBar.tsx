@@ -41,7 +41,7 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({subjectI
             <SubjectEditor
                 subjectId={subjectId}
                 showDialog={subjectEditor.visible}
-                type={subjectEditor.editorType}
+                editorType={subjectEditor.editorType}
                 setShowDialog={setShowAddSubject}
             />
             <Box
