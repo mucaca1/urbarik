@@ -11,6 +11,8 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import MapIcon from '@mui/icons-material/Map';
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import AddOptionsButton from "../components/EditorOptionsButtonBar";
+import { useUnit } from "../context/UnitContext";
+import { fromBaseUnit } from "../utils/unitConversion";
 
 const subjectColumns: GridColDef[] = [
     { field: 'firstName', headerName: 'First name', width: 250},
@@ -25,7 +27,8 @@ const landPartColumns: GridColDef[] = [
 ];
 
 export const HomeScreen: React.FC = () => {
-    const {t} = useTranslation();
+    const { t } = useTranslation();
+    const { unit, unitAsString } = useUnit();
     const [selectedSubject, setSelectedSubject] = useState<TSubjectId | null>(null);
     const [selectedLandPart, setSelectedLandPart] = useState<TLandPartId | null>(null);
     const [table, setTable] = useState<number>(0);
@@ -57,7 +60,7 @@ export const HomeScreen: React.FC = () => {
             {
                 id: row.id,
                 certificateOfOwnership: row.certificateOfOwnership,
-                plotDimensions: row.plotDimensions
+                plotDimensions: fromBaseUnit(row.plotDimensions | 0, unit).toString() + " " + unitAsString(unit)
             }
         ));
     }

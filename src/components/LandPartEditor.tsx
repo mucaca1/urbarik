@@ -7,6 +7,9 @@ import { ToastContainer } from "react-toastify";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { getLandPart } from "../evolu-queries";
 import { EditorType } from "../types";
+import AreaUnitInput from "./AreaUnitInput";
+import { useUnit } from "../context/UnitContext";
+import { useState } from "react";
 
 interface LandPartEditorProps {
     landPartId: TLandPartId | null,
@@ -135,7 +138,12 @@ const LandPartEditor: React.FC<LandPartEditorProps> = ({ landPartId, showDialog,
                             name="plotDimensions"
                             control={control}
                             render={({ field }) => (
-                                <TextField {...field} label="Plot dimensions" fullWidth required type="number" />
+                                <AreaUnitInput {...field}
+                                label="Plot dimensions"
+                                fullWidth
+                                required
+                                baseValue={Number.parseInt(field.value)}
+                                    onBaseValueChange={(valueInM2: number) => setValue("plotDimensions", valueInM2.toString())} />
                             )}
                         />
                     </Box>
