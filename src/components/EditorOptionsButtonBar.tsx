@@ -10,6 +10,8 @@ import { TSubjectId, TLandPartId, TLandOwnershipId } from '../evolu-db';
 import { EditorType } from '../types';
 import SubjectEditor from './SubjectEditor';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useEvolu } from '@evolu/react';
+import { notifyError, notifySuccess } from '../utils/toastNotification';
 
 interface EditorOptionsButtonBarProps {
     subjectId: TSubjectId | null,
@@ -18,6 +20,7 @@ interface EditorOptionsButtonBarProps {
 }
 
 const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({subjectId}) => {
+    const { update } = useEvolu();
     const [subjectEditor, setSubjectEditor] = useState<{visible: boolean, editorType: EditorType | null}>({visible: false, editorType: null});
     const [landPartEditor, setLandPartEditor] = useState<{ visible: boolean, editorType: EditorType | null }>({ visible: false, editorType: null });
     const [ownershipEditor, setOwnershipEditor] = useState<{ visible: boolean, editorType: EditorType | null }>({ visible: false, editorType: null });
@@ -122,6 +125,18 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({subjectI
                     }}>
                         <Tooltip title="Delete" placement="bottom">
                             <Fab
+                                onClick={() => {
+                                    if (subjectId == null) return;
+
+                                    const subjectUdeleteResult = update("subject", { id: subjectId, isDeleted: true })
+                                    if (subjectUdeleteResult.ok) {
+                                        console.log("Subject deleted successfully:", subjectUdeleteResult);
+                                        notifySuccess("Successfully deleted");
+                                    } else {
+                                        console.error("Error deleting subject:", subjectUdeleteResult.error);
+                                        notifyError("Delete failed");
+                                    }
+                                }}
                                 color="error"
                                 size="large"
                                 sx={{ marginLeft: 1 }}
