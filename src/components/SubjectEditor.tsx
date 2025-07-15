@@ -6,9 +6,7 @@ import { TSubjectId } from "../evolu-db";
 import { ToastContainer } from "react-toastify";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { getSubject } from "../evolu-queries";
-import { useEffect, useState } from "react";
 import { EditorType } from "../types";
-import { Int } from "@evolu/common";
 
 interface SubjectEditorProps {
     subjectId: TSubjectId | null,
@@ -122,8 +120,7 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ed
                 notifyError("Stored failed");
             }
         }
-      };
-
+    };
 
     return (<div>
         <ToastContainer />

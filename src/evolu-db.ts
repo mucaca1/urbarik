@@ -72,6 +72,10 @@ export const evolu = createEvolu(evoluReactWebDeps)(Schema, {
             evolu.insert('subject', {
                 firstName: "Matej", lastName: "Mrkva", nationalIdNumber: "EC123GH5", street: "Beckovksa", houseNumber: "4578/1", postCode: 91101, city: "Trencin"
             });
+
+        evolu.insert('landPart', {
+            certificateOfOwnership: "EC123GH5", plotDimensions: 100
+        });
     },
 
     indexes: (create) => [

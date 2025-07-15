@@ -12,6 +12,7 @@ import SubjectEditor from './SubjectEditor';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useEvolu } from '@evolu/react';
 import { notifyError, notifySuccess } from '../utils/toastNotification';
+import LandPartEditor from './LandPartEditor';
 
 interface EditorOptionsButtonBarProps {
     subjectId: TSubjectId | null,
@@ -19,7 +20,7 @@ interface EditorOptionsButtonBarProps {
     ownershipId: TLandOwnershipId | null,
 }
 
-const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({subjectId}) => {
+const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ subjectId, landPartId, ownershipId }) => {
     const { update } = useEvolu();
     const [subjectEditor, setSubjectEditor] = useState<{visible: boolean, editorType: EditorType | null}>({visible: false, editorType: null});
     const [landPartEditor, setLandPartEditor] = useState<{ visible: boolean, editorType: EditorType | null }>({ visible: false, editorType: null });
@@ -28,15 +29,29 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({subjectI
     const [modifyOpen, setModifyOpen] = useState<boolean>(false);
 
     useEffect(() => {
-        setModifyOpen(subjectId !== null);
-    }, [subjectId]);
+        setModifyOpen(subjectId !== null || landPartId !== null || ownershipId !== null);
+    }, [subjectId, landPartId, ownershipId]);
 
     const handleToggle = () => {
         setAddOpen((prev) => !prev);
     };
 
+    const setShowModifyEditor = (show: boolean, editorType?: EditorType) => {
+        if (subjectId !== null) {
+            setSubjectEditor({ visible: show, editorType: editorType ? editorType : null });
+        } else if (landPartId !== null) {
+            setLandPartEditor({ visible: show, editorType: editorType ? editorType : null });
+        } else if (ownershipId !== null) {
+            setOwnershipEditor({ visible: show, editorType: editorType ? editorType : null });
+        }
+    }
+
     const setShowAddSubject = (show: boolean, editorType?: EditorType) => {
         setSubjectEditor({ visible: show, editorType: editorType ? editorType : null });
+    }
+
+    const setShowAddLandPart = (show: boolean, editorType?: EditorType) => {
+        setLandPartEditor({ visible: show, editorType: editorType ? editorType : null });
     }
 
     return (
@@ -46,6 +61,12 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({subjectI
                 showDialog={subjectEditor.visible}
                 editorType={subjectEditor.editorType}
                 setShowDialog={setShowAddSubject}
+            />
+            <LandPartEditor
+                landPartId={landPartId}
+                showDialog={landPartEditor.visible}
+                editorType={landPartEditor.editorType}
+                setShowDialog={setShowAddLandPart}
             />
             <Box
                 sx={{
@@ -84,6 +105,7 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({subjectI
                 <Zoom in={addOpen} style={{ transitionDelay: addOpen ? '50ms' : '0ms' }}>
                     <Tooltip title="Add land part" placement="bottom">
                         <Fab
+                            onClick={() => setShowAddLandPart(true, "create")}
                             color="success"
                             size="medium"
                             sx={{ marginLeft: 1 }}
@@ -111,7 +133,7 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({subjectI
                         }}>
                         <Tooltip title="Modify" placement="bottom">
                             <Fab
-                                onClick={() => setShowAddSubject(true, "edit")}
+                                onClick={() => setShowModifyEditor(true, "edit")}
                                 color="primary"
                                 size="large"
                                 sx={{ marginLeft: 1 }}
@@ -126,15 +148,33 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({subjectI
                         <Tooltip title="Delete" placement="bottom">
                             <Fab
                                 onClick={() => {
-                                    if (subjectId == null) return;
-
-                                    const subjectUdeleteResult = update("subject", { id: subjectId, isDeleted: true })
-                                    if (subjectUdeleteResult.ok) {
-                                        console.log("Subject deleted successfully:", subjectUdeleteResult);
-                                        notifySuccess("Successfully deleted");
-                                    } else {
-                                        console.error("Error deleting subject:", subjectUdeleteResult.error);
-                                        notifyError("Delete failed");
+                                    if (subjectId != null) {
+                                        const subjectUdeleteResult = update("subject", { id: subjectId, isDeleted: true })
+                                        if (subjectUdeleteResult.ok) {
+                                            console.log("Subject deleted successfully:", subjectUdeleteResult);
+                                            notifySuccess("Successfully deleted");
+                                        } else {
+                                            console.error("Error deleting subject:", subjectUdeleteResult.error);
+                                            notifyError("Delete failed");
+                                        }
+                                    } else if (landPartId != null) {
+                                        const landPartDeleteResult = update("landPart", { id: landPartId, isDeleted: true })
+                                        if (landPartDeleteResult.ok) {
+                                            console.log("Land part deleted successfully:", landPartDeleteResult);
+                                            notifySuccess("Successfully deleted");
+                                        } else {
+                                            console.error("Error deleting land part:", landPartDeleteResult.error);
+                                            notifyError("Delete failed");
+                                        }
+                                    } else if (ownershipId != null) {
+                                        const ownershipDeleteResult = update("landOwnership", { id: ownershipId, isDeleted: true })
+                                        if (ownershipDeleteResult.ok) {
+                                            console.log("Ownership deleted successfully:", ownershipDeleteResult);
+                                            notifySuccess("Successfully deleted");
+                                        } else {
+                                            console.error("Error deleting ownership:", ownershipDeleteResult.error);
+                                            notifyError("Delete failed");
+                                        }
                                     }
                                 }}
                                 color="error"
