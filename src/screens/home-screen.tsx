@@ -31,11 +31,11 @@ export const HomeScreen: React.FC = () => {
     const { unit, unitAsString } = useUnit();
     const [selectedSubject, setSelectedSubject] = useState<TSubjectId | null>(null);
     const [selectedLandPart, setSelectedLandPart] = useState<TLandPartId | null>(null);
-    const [table, setTable] = useState<number>(0);
+    const [table, setTable] = useState<"subject" | "landPart" | "landOwnership">("subject");
 
-    const swapTable = (newTable: number) => {
-        if (newTable !== null) {
-            setTable(newTable);
+    const swapTable = (event: React.MouseEvent<HTMLElement>, table: "subject" | "landPart" | "landOwnership" | null) => {
+        if (table !== null) {
+            setTable(table);
             setSelectedSubject(null);
             setSelectedLandPart(null);
         }
@@ -43,7 +43,7 @@ export const HomeScreen: React.FC = () => {
 
     let rows = {} as Row[];
 
-    if (table === 0) {
+    if (table === "subject") {
         const subjects: QueryRows<TAllSubjectsRow> = useQuery(getAllSubjectsQuery);
         rows = subjects.map((row: TAllSubjectsRow) => (
             {
@@ -54,7 +54,7 @@ export const HomeScreen: React.FC = () => {
                 address: (`${row.street || ""} ${row.houseNumber || ""} ${row.postCode || ""} ${row.city || ""}`)
             }
         ));
-    } else if (table === 1) {
+    } else if (table === "landPart") {
         const landParts: QueryRows = useQuery(getAllLandPartQuery);
         rows = landParts.map((row: any) => (
             {
@@ -70,18 +70,20 @@ export const HomeScreen: React.FC = () => {
             <h1>{t('home')}</h1>
             <AddOptionsButton subjectId={selectedSubject} landPartId={selectedLandPart} ownershipId={null}/>
             <ToggleButtonGroup
-                    exclusive
-                    size="large"
-                    fullWidth
-                >
-                <ToggleButton value="subject" onClick={() => swapTable(0)}><AccountCircleIcon /> Subjects</ToggleButton>
-                <ToggleButton value="landPart" onClick={() => swapTable(1)}><MapIcon /> Land part</ToggleButton>
+                value={table}
+                exclusive
+                size="large"
+                fullWidth
+                onChange={swapTable}
+            >
+                <ToggleButton value="subject"><AccountCircleIcon /> Subjects</ToggleButton>
+                <ToggleButton value="landPart"><MapIcon /> Land part</ToggleButton>
                 <ToggleButton value="landOwnership"><AddLocationAltIcon />Land ownership</ToggleButton>
             </ToggleButtonGroup>
             <Box sx={{ height: 600, width: '100%' }}>
                 <DataGrid
                     rows={rows}
-                    columns={table === 0 ? subjectColumns : landPartColumns}
+                    columns={table === "subject" ? subjectColumns : landPartColumns}
                     initialState={{
                         pagination: {
                             paginationModel: {
@@ -98,9 +100,9 @@ export const HomeScreen: React.FC = () => {
                                 setSelectedSubject(null);
                                 setSelectedLandPart(null);
                             } else {
-                                if (table === 0) {
+                                if (table === "subject") {
                                     setSelectedSubject(a.value as TSubjectId);
-                                } else if (table === 1) {
+                                } else if (table === "landPart") {
                                     setSelectedLandPart(a.value as TLandPartId);
                                 }
                             }

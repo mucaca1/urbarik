@@ -20,7 +20,7 @@ interface LandPartEditorProps {
 
 interface FormValues {
     certificateOfOwnership: string;
-    plotDimensions: string;
+    plotDimensions: number;
 }
 
 const LandPartEditor: React.FC<LandPartEditorProps> = ({ landPartId, showDialog, editorType, setShowDialog }) => {
@@ -34,14 +34,14 @@ const LandPartEditor: React.FC<LandPartEditorProps> = ({ landPartId, showDialog,
     } = useForm<FormValues>({
         defaultValues: {
             certificateOfOwnership: '',
-            plotDimensions: ''
+            plotDimensions: 0
         }
     });
 
     // Reset form values based on type
     if (editorType === "create") {
         setValue('certificateOfOwnership', '');
-        setValue('plotDimensions', '');
+        setValue('plotDimensions', 0);
     }
 
     // Fetch subject data if editing
@@ -50,7 +50,7 @@ const LandPartEditor: React.FC<LandPartEditorProps> = ({ landPartId, showDialog,
             const landPart = result[0];
             if (landPart) {
                 setValue('certificateOfOwnership', landPart.certificateOfOwnership as string);
-                setValue('plotDimensions', landPart.plotDimensions as string);
+                setValue('plotDimensions', landPart.plotDimensions as number);
             } else {
                 notifyError("Land part not found");
             }
@@ -62,20 +62,14 @@ const LandPartEditor: React.FC<LandPartEditorProps> = ({ landPartId, showDialog,
     }
 
     const onSubmit: SubmitHandler<FormValues> = (data) => {
-        let certificateOfOwnership = nullEmptyValue(data.certificateOfOwnership);
-        let plotDimensions = nullEmptyValue(data.plotDimensions);
-        if (certificateOfOwnership === null || certificateOfOwnership === undefined) {
-            certificateOfOwnership = '';
-        }
-        if (plotDimensions === null || plotDimensions === undefined) {
-            plotDimensions = '';
-        }
+        let certificateOfOwnership: string = data.certificateOfOwnership;
+        let plotDimensions: number = data.plotDimensions;
 
         if (editorType === "edit" && landPartId) {
             const landPartUpdateResult = update('landPart', {
                 id: landPartId,
                 certificateOfOwnership: certificateOfOwnership,
-                plotDimensions: plotDimensions?.length > 0 ? Number.parseInt(plotDimensions) : null
+                plotDimensions: plotDimensions
             });
             if (landPartUpdateResult.ok) {
                 console.log("Ladn part updated successfully:", landPartUpdateResult);
@@ -90,7 +84,7 @@ const LandPartEditor: React.FC<LandPartEditorProps> = ({ landPartId, showDialog,
         } else if (editorType === "create") {
             const landPartInsertResult = insert('landPart', {
                 certificateOfOwnership: certificateOfOwnership,
-                plotDimensions: plotDimensions?.length > 0 ? Number.parseInt(plotDimensions) : null
+                plotDimensions: plotDimensions
             });
 
             if (landPartInsertResult.ok) {
@@ -142,8 +136,8 @@ const LandPartEditor: React.FC<LandPartEditorProps> = ({ landPartId, showDialog,
                                 label="Plot dimensions"
                                 fullWidth
                                 required
-                                baseValue={Number.parseInt(field.value)}
-                                    onBaseValueChange={(valueInM2: number) => setValue("plotDimensions", valueInM2.toString())} />
+                                baseValue={field.value}
+                                onBaseValueChange={(valueInM2: number) => setValue("plotDimensions", valueInM2)} />
                             )}
                         />
                     </Box>
@@ -158,13 +152,6 @@ const LandPartEditor: React.FC<LandPartEditorProps> = ({ landPartId, showDialog,
             </DialogContent>
         </Dialog>
     </div>);
-}
-
-const nullEmptyValue = (value: string): string | null => {
-    if (value === "") {
-        return null;
-    }
-    return value;
 }
 
 export default LandPartEditor;

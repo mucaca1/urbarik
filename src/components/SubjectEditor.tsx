@@ -81,7 +81,7 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ed
     const onSubmit: SubmitHandler<FormValues> = (data) => {
         const street = nullEmptyValue(data.street);
         const houseNumber = nullEmptyValue(data.houseNumber);
-        let postcode = nullEmptyValue(data.postcode);
+        let postcode: String | null = nullEmptyValue(data.postcode);
         if (postcode === null || postcode === undefined) {
             postcode = '';
         }
@@ -92,7 +92,7 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ed
                 id: subjectId,
                 firstName: data.firstName,
                 lastName: data.lastName,
-                nationalIdNumber: data.nationalIdentificationNumber, street: street, houseNumber: houseNumber, postCode: postcode?.length > 0 ? Number.parseInt(postcode) : null, city: city
+                nationalIdNumber: data.nationalIdentificationNumber, street: street, houseNumber: houseNumber, postCode: postcode?.length > 0 ? Number.parseInt(postcode.toString()) : null, city: city
             });
             if (subjectUpdateResult.ok) {
                 console.log("Subject updated successfully:", subjectUpdateResult);
@@ -103,11 +103,10 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ed
                 console.error("Error updating subject:", subjectUpdateResult.error);
                 notifyError("Update failed");
             }
-
         } else if (editorType === "create") {
             const subjectInsertResult = insert('subject', {
                 firstName: data.firstName, lastName: data.lastName, nationalIdNumber: data.nationalIdentificationNumber,
-                street: street, houseNumber: houseNumber, postCode: postcode?.length > 0 ? Number.parseInt(postcode) : null, city: city
+                street: street, houseNumber: houseNumber, postCode: postcode?.length > 0 ? Number.parseInt(postcode.toString()) : null, city: city
             })
 
             if (subjectInsertResult.ok) {
@@ -224,7 +223,7 @@ const nullEmptyValue = (value: string): string | null => {
     if (value === "") {
         return null;
     }
-    return value;
+    return String(value);
 }
 
 export default SubjectEditor;
