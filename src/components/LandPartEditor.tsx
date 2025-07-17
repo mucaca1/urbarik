@@ -49,8 +49,8 @@ const LandPartEditor: React.FC<LandPartEditorProps> = ({ landPartId, showDialog,
         getLandPart(landPartId).then((result) => {
             const landPart = result[0];
             if (landPart) {
-                setValue('certificateOfOwnership', landPart.firstName as string);
-                setValue('plotDimensions', landPart.lastName as string);
+                setValue('certificateOfOwnership', landPart.certificateOfOwnership as string);
+                setValue('plotDimensions', landPart.plotDimensions as string);
             } else {
                 notifyError("Land part not found");
             }
