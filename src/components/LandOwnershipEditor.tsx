@@ -1,17 +1,15 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { Transition } from "../utils/transition";
-import { useEvolu, useQuery } from "@evolu/react";
+import { useEvolu } from "@evolu/react";
 import { notifyError, notifySuccess } from "../utils/toastNotification";
 import { TLandOwnershipId, TLandPartId, TSubjectId } from "../evolu-db";
 import { ToastContainer } from "react-toastify";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { getLandOwnership, getLandPart } from "../evolu-queries";
+import { getLandOwnership } from "../evolu-queries";
 import { EditorType } from "../types";
-import AreaUnitInput from "./AreaUnitInput";
-import { useUnit } from "../context/UnitContext";
-import { useState } from "react";
 import FractionInput from "./FractionInput";
 import SubjectPicker from "./SubjectPicker";
+import LandPartPicker from "./LandPartPicker";
 
 interface LandOwnershipEditorProps {
     landOwnershipId: TLandOwnershipId | null,
@@ -133,20 +131,14 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
                             name="landPartId"
                             control={control}
                             render={({ field }) => (
-                                <TextField {...field}
-                                    label="Land part"
-                                    fullWidth
-                                    required />
+                                <LandPartPicker {...field} />
                             )}
                         />
                         <Controller
                             name="subjectId"
                             control={control}
                             render={({ field }) => (
-                                <SubjectPicker
-                                    {...field}
-                                    required
-                                />
+                                <SubjectPicker {...field} />
                             )}
                         />
                         <Controller

@@ -8,59 +8,70 @@ import {
 import { evolu, TSubjectId } from '../evolu-db';
 import { getAllSubjectsQuery, TAllSubjectsRow } from '../evolu-queries';
 import { QueryRows } from '@evolu/common';
+import { useQuery } from '@evolu/react';
+import { ControllerRenderProps } from 'react-hook-form';
 
 interface SubjectPickerProps {
-    setSelectedSubject?: (subject: TSubjectId | null) => void;
     disabled?: boolean;
-    required?: boolean;
+    value: TSubjectId | null;
+    onChange: (value: TSubjectId | null) => void;
 }
 
 interface SubjectInterface {
     id: TSubjectId;
     lastName: string;
     firstName: string;
-    identityCard: string
+    identityCard: string;
 }
 
 const SubjectPicker: React.FC<SubjectPickerProps> = ({
-    setSelectedSubject = undefined,
     disabled = false,
-    required = false
+    value,
+    onChange,
 }) => {
-    const [value, setValue] = useState<SubjectInterface | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [subjects, setSubjects] = useState<SubjectInterface[]>([]);
+    //const [loading, setLoading] = useState<boolean>(true);
+    const [subjects, setSubjects] = useState<SubjectInterface[]>(useQuery(getAllSubjectsQuery).map((row: TAllSubjectsRow) => (
+        {
+            id: row.id,
+            lastName: row.lastName || '',
+            firstName: row.firstName || '',
+            identityCard: row.nationalIdNumber || ''
+        }
+        )));
 
+    /*
+    Do not work for now.
+    Fetch subjects from the database and set them in the state.
     useEffect(() => {
-        const subjects: Promise<QueryRows<TAllSubjectsRow>> = evolu.loadQuery(getAllSubjectsQuery);
-        subjects.then((subjects: QueryRows<TAllSubjectsRow>) => {
-            setSubjects(subjects.map((row: TAllSubjectsRow) => (
+        const subjectsP: Promise<QueryRows<TAllSubjectsRow>> = evolu.loadQuery(getAllSubjectsQuery);
+        subjectsP.then((subjectsData: QueryRows<TAllSubjectsRow>) => {
+            const data = subjectsData.map((row: TAllSubjectsRow) => (
                 {
                     id: row.id,
                     lastName: row.lastName || '',
                     firstName: row.firstName || '',
                     identityCard: row.nationalIdNumber || ''
                 }
-            )));
+            ))
+            setSubjects(data);
         }).finally(() => {
             setLoading(false);
         });
-    });
+    });*/
 
     return (
         <Autocomplete
-            loading={loading}
+            //loading={loading}
             loadingText="Loading subjects..."
             options={subjects}
             getOptionLabel={(option) => `${option.firstName} ${option.lastName}`}
-            value={value}
-            onChange={(event, newValue: SubjectInterface | null) => { setValue(newValue); setSelectedSubject && setSelectedSubject(newValue?.id || null); }}
+            value={value ? subjects.find((s) => s.id === value) || null : null}
+            onChange={(_, newValue: SubjectInterface | null) => onChange(newValue?.id || null) }
             isOptionEqualToValue={(option, val) => option.id === val.id}
             disabled={disabled}
             renderInput={(params) => (
                 <TextField
                     {...params}
-                    required={required}
                     label={"Subject"}
                     placeholder="Start typing to search..."
                 />

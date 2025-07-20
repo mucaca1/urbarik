@@ -29,7 +29,7 @@ export const getSubject = async (subjectId: TSubjectId) => {
     return subjectRows
 }
 
-export const getAllLandPartQuery: Query = evolu.createQuery((db) =>
+export const getAllLandPartQuery = evolu.createQuery((db) =>
     db.selectFrom("landPart")
         .select(["id", "certificateOfOwnership", "plotDimensions"])
         .where("isDeleted", "is not", 1), queryOptions,

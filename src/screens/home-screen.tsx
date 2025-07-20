@@ -1,20 +1,17 @@
 import { useTranslation } from "react-i18next";
-import { DataGrid, GridCallbackDetails, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormGroup, Paper, Slide, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import { getAllLandOwnershipQuery, getAllLandPartQuery, getAllSubjectsQuery, getSubject, TAllLandOwnershipRow, TAllLandPartRow, TAllSubjectsRow } from "../evolu-queries";
-import { useEvolu, useQuery } from "@evolu/react";
-import { Ok, ok, QueryRows, Result, Row, tryAsync } from "@evolu/common";
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import React, { useEffect, useState } from "react";
-import { evolu, TLandOwnershipId, TLandPartId, TSubjectId } from "../evolu-db";
+import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
+import { Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { getAllLandOwnershipQuery, getAllLandPartQuery, getAllSubjectsQuery, TAllLandOwnershipRow, TAllSubjectsRow } from "../evolu-queries";
+import { useQuery } from "@evolu/react";
+import { QueryRows, Row } from "@evolu/common";
+import React, { useState } from "react";
+import { TLandOwnershipId, TLandPartId, TSubjectId } from "../evolu-db";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import MapIcon from '@mui/icons-material/Map';
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import AddOptionsButton from "../components/EditorOptionsButtonBar";
 import { useUnit } from "../context/UnitContext";
 import { fromBaseUnit } from "../utils/unitConversion";
-import FractionInput from "../components/FractionInput";
-import SubjectPicker from "../components/SubjectPicker";
 
 const subjectColumns: GridColDef[] = [
     { field: 'firstName', headerName: 'First name', width: 250},
