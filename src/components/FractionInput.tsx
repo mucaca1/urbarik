@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { Box, IconButton, TextField, Tooltip } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Tooltip,
+} from '@mui/material';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 
 interface FractionInputProps {
@@ -15,8 +21,10 @@ const FractionInput: React.FC<FractionInputProps> = ({
   onChange,
   required = false,
 }) => {
-  const [isFractionMode, setIsFractionMode] = useState<boolean>(false);
-  const [inputValue, setInputValue] = useState<string>(value !== null ? value.toString() : '');
+  const [isFractionMode, setIsFractionMode] = useState(false);
+  const [inputValue, setInputValue] = useState<string>(
+    value !== null ? value.toString() : ''
+  );
   const [error, setError] = useState<string | null>(null);
 
   const parseFraction = (input: string): number => {
@@ -28,13 +36,13 @@ const FractionInput: React.FC<FractionInputProps> = ({
         return numerator / denominator;
       }
     }
-    return parseFloat(input); // fallback for decimals or invalid fraction
+    return parseFloat(input); // fallback
   };
 
   const isValidFraction = (input: string): boolean => {
     const parts = input.split('/');
     if (parts.length !== 2) return false;
-    const [numerator, denominator] = parts.map(p => parseFloat(p));
+    const [numerator, denominator] = parts.map((p) => parseFloat(p));
     return (
       !isNaN(numerator) &&
       !isNaN(denominator) &&
@@ -44,7 +52,7 @@ const FractionInput: React.FC<FractionInputProps> = ({
   };
 
   const formatFraction = (val: number): string => {
-    const tolerance = 1.0E-6;
+    const tolerance = 1.0e-6;
     let numerator = 1;
     let denominator = 1;
     let error = Math.abs(val - numerator / denominator);
@@ -73,10 +81,9 @@ const FractionInput: React.FC<FractionInputProps> = ({
       return;
     }
 
-    // Validation depending on mode
     if (isFractionMode) {
       if (!isValidFraction(val)) {
-        setError('Invalid fraction format. Use e.g. 3/4');
+        setError('Invalid fraction format (e.g. 3/4)');
         return;
       }
       const parsed = parseFraction(val);
@@ -106,24 +113,32 @@ const FractionInput: React.FC<FractionInputProps> = ({
   };
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      <TextField
-        label={label}
-        type={isFractionMode ? 'text' : 'number'}
-        value={inputValue}
-        onChange={handleInputChange}
-        error={!!error}
-        helperText={error}
-        fullWidth
-        required={required}
-      />
-      <Tooltip title={isFractionMode ? 'Switch to decimal' : 'Switch to fraction'}>
-        <IconButton onClick={handleToggle} color="primary">
-          <SwapHorizIcon />
-        </IconButton>
-      </Tooltip>
-    </Box>
+    <TextField
+      label={label}
+      type={isFractionMode ? 'text' : 'number'}
+      value={inputValue}
+      onChange={handleInputChange}
+      error={!!error}
+      helperText={error}
+      fullWidth
+      slotProps={{
+        input: {
+          required,
+          'aria-required': required ? 'true' : 'false',
+          endAdornment: (
+            <InputAdornment position="end">
+              <Tooltip title={isFractionMode ? 'Switch to decimal' : 'Switch to fraction'}>
+                <IconButton onClick={handleToggle} size="small">
+                  <SwapHorizIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </InputAdornment>
+          ),
+        },
+      }}
+    />
   );
 };
 
 export default FractionInput;
+export type { FractionInputProps };
