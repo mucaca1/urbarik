@@ -13,6 +13,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useEvolu } from '@evolu/react';
 import { notifyError, notifySuccess } from '../utils/toastNotification';
 import LandPartEditor from './LandPartEditor';
+import LandOwnershipEditor from './LandOwnershipEditor';
 
 interface EditorOptionsButtonBarProps {
     subjectId: TSubjectId | null,
@@ -54,6 +55,10 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ subject
         setLandPartEditor({ visible: show, editorType: editorType ? editorType : null });
     }
 
+    const setShowAddLandOwnership = (show: boolean, editorType?: EditorType) => {
+        setOwnershipEditor({ visible: show, editorType: editorType ? editorType : null });
+    }
+
     return (
         <div>
             <SubjectEditor
@@ -67,6 +72,12 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ subject
                 showDialog={landPartEditor.visible}
                 editorType={landPartEditor.editorType}
                 setShowDialog={setShowAddLandPart}
+            />
+            <LandOwnershipEditor
+                landOwnershipId={ownershipId}
+                showDialog={ownershipEditor.visible}
+                editorType={ownershipEditor.editorType}
+                setShowDialog={setShowAddLandOwnership}
             />
             <Box
                 sx={{
@@ -118,6 +129,7 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ subject
                 <Zoom in={addOpen} style={{ transitionDelay: addOpen ? '100ms' : '0ms' }}>
                     <Tooltip title="Add ownership" placement="bottom">
                         <Fab
+                            onClick={() => setShowAddLandOwnership(true, "create")}
                             color="success"
                             size="medium"
                             sx={{ marginLeft: 1 }}

@@ -1,5 +1,5 @@
-import { evolu, TLandPartId } from "./evolu-db";
-import { QueryRows } from "@evolu/common";
+import { evolu, TLandOwnershipId, TLandPartId } from "./evolu-db";
+import { Query, QueryRows } from "@evolu/common";
 import { TSubjectId } from "./evolu-db"
 
 const queryOptions = {
@@ -29,7 +29,7 @@ export const getSubject = async (subjectId: TSubjectId) => {
     return subjectRows
 }
 
-export const getAllLandPartQuery = evolu.createQuery((db) =>
+export const getAllLandPartQuery: Query = evolu.createQuery((db) =>
     db.selectFrom("landPart")
         .select(["id", "certificateOfOwnership", "plotDimensions"])
         .where("isDeleted", "is not", 1), queryOptions,
@@ -46,4 +46,23 @@ export const getLandPart = async (landPartId: TLandPartId) => {
         )
     );
     return landPartRows;
+}
+
+export const getAllLandOwnershipQuery = evolu.createQuery((db) =>
+    db.selectFrom("landOwnership")
+        .select(["id", "subjectId", "landPartId", "share"])
+        .where("isDeleted", "is not", 1), queryOptions,
+);
+export type TAllLandOwnershipRow = typeof getAllLandOwnershipQuery.Row;
+
+export const getLandOwnership = async (landOwnershipId: TLandOwnershipId) => {
+    const landOwnershipRows: QueryRows = await evolu.loadQuery(
+        evolu.createQuery((db) =>
+            db.selectFrom("landOwnership")
+                .select(["id", "subjectId", "landPartId", "share"])
+                .where("isDeleted", "is not", 1)
+                .where("id", "=", landOwnershipId).limit(1), queryOptions,
+        )
+    );
+    return landOwnershipRows;
 }

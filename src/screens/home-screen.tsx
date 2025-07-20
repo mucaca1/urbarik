@@ -1,18 +1,20 @@
 import { useTranslation } from "react-i18next";
 import { DataGrid, GridCallbackDetails, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormGroup, Paper, Slide, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import { getAllLandPartQuery, getAllSubjectsQuery, getSubject, TAllSubjectsRow } from "../evolu-queries";
+import { getAllLandOwnershipQuery, getAllLandPartQuery, getAllSubjectsQuery, getSubject, TAllLandOwnershipRow, TAllLandPartRow, TAllSubjectsRow } from "../evolu-queries";
 import { useEvolu, useQuery } from "@evolu/react";
-import { QueryRows, Row } from "@evolu/common";
+import { Ok, ok, QueryRows, Result, Row, tryAsync } from "@evolu/common";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import React, { useState } from "react";
-import { TLandPartId, TSubjectId } from "../evolu-db";
+import React, { useEffect, useState } from "react";
+import { evolu, TLandOwnershipId, TLandPartId, TSubjectId } from "../evolu-db";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import MapIcon from '@mui/icons-material/Map';
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import AddOptionsButton from "../components/EditorOptionsButtonBar";
 import { useUnit } from "../context/UnitContext";
 import { fromBaseUnit } from "../utils/unitConversion";
+import FractionInput from "../components/FractionInput";
+import SubjectPicker from "../components/SubjectPicker";
 
 const subjectColumns: GridColDef[] = [
     { field: 'firstName', headerName: 'First name', width: 250},
@@ -26,11 +28,19 @@ const landPartColumns: GridColDef[] = [
     { field: 'plotDimensions', headerName: 'Plot dimension', width: 250 }
 ];
 
+const landOwnershipColumns: GridColDef[] = [
+    { field: 'landPart', headerName: 'Land part', width: 250 },
+    { field: 'subject', headerName: 'Subject', width: 250 },
+    { field: 'fraction', headerName: 'Fraction', width: 250 }
+];
+
+
 export const HomeScreen: React.FC = () => {
     const { t } = useTranslation();
     const { unit, unitAsString } = useUnit();
     const [selectedSubject, setSelectedSubject] = useState<TSubjectId | null>(null);
     const [selectedLandPart, setSelectedLandPart] = useState<TLandPartId | null>(null);
+    const [selectedLandOwnership, setSelectedLandOwnership] = useState<TLandOwnershipId | null>(null);
     const [table, setTable] = useState<"subject" | "landPart" | "landOwnership">("subject");
 
     const swapTable = (event: React.MouseEvent<HTMLElement>, table: "subject" | "landPart" | "landOwnership" | null) => {
@@ -38,6 +48,7 @@ export const HomeScreen: React.FC = () => {
             setTable(table);
             setSelectedSubject(null);
             setSelectedLandPart(null);
+            setSelectedLandOwnership(null);
         }
     }
 
@@ -63,12 +74,14 @@ export const HomeScreen: React.FC = () => {
                 plotDimensions: fromBaseUnit(row.plotDimensions | 0, unit).toString() + " " + unitAsString(unit)
             }
         ));
+    } else if (table === "landOwnership") {
+        const landOwnerships: QueryRows<TAllLandOwnershipRow> = useQuery(getAllLandOwnershipQuery);
     }
 
     return (
         <div>
             <h1>{t('home')}</h1>
-            <AddOptionsButton subjectId={selectedSubject} landPartId={selectedLandPart} ownershipId={null}/>
+            <AddOptionsButton subjectId={selectedSubject} landPartId={selectedLandPart} ownershipId={selectedLandOwnership}/>
             <ToggleButtonGroup
                 value={table}
                 exclusive
@@ -83,7 +96,7 @@ export const HomeScreen: React.FC = () => {
             <Box sx={{ height: 600, width: '100%' }}>
                 <DataGrid
                     rows={rows}
-                    columns={table === "subject" ? subjectColumns : landPartColumns}
+                    columns={table === "subject" ? subjectColumns : table === "landPart" ? landPartColumns : landOwnershipColumns}
                     initialState={{
                         pagination: {
                             paginationModel: {
@@ -99,11 +112,14 @@ export const HomeScreen: React.FC = () => {
                             if (a.value === undefined) {
                                 setSelectedSubject(null);
                                 setSelectedLandPart(null);
+                                setSelectedLandOwnership(null);
                             } else {
                                 if (table === "subject") {
                                     setSelectedSubject(a.value as TSubjectId);
                                 } else if (table === "landPart") {
                                     setSelectedLandPart(a.value as TLandPartId);
+                                } else if (table === "landOwnership") {
+                                    setSelectedLandOwnership(a.value as TLandOwnershipId);
                                 }
                             }
                         }
