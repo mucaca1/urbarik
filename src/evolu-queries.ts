@@ -1,5 +1,5 @@
 import { evolu, TLandOwnershipId, TLandPartId } from "./evolu-db";
-import { Query, QueryRows } from "@evolu/common";
+import { kysely, Query, QueryRows } from "@evolu/common";
 import { TSubjectId } from "./evolu-db"
 
 const queryOptions = {
@@ -36,6 +36,17 @@ export const getAllLandPartQuery = evolu.createQuery((db) =>
 );
 export type TAllLandPartRow = typeof getAllLandPartQuery.Row;
 
+export const getAllLandPartWithOwnersQuery = evolu.createQuery((db) =>
+    db.selectFrom("landPart")
+        .leftJoin("landOwnership", (join) => join.onRef("landPart.id", "=", "landOwnership.landPartId"))
+        .leftJoin("subject", (join) => join.onRef("subject.id", "=", "landOwnership.subjectId"))
+        .select(["landPart.id", "landPart.certificateOfOwnership", "landPart.plotDimensions",
+                "landOwnership.share",
+                "subject.firstName", "subject.lastName", "subject.nationalIdNumber"])
+        .where("isDeleted", "is not", 1), queryOptions,
+);
+export type TAllLandPartWithOwnersRow = typeof getAllLandPartWithOwnersQuery.Row;
+
 export const getLandPart = async (landPartId: TLandPartId) => {
     const landPartRows: QueryRows = await evolu.loadQuery(
         evolu.createQuery((db) =>
@@ -51,7 +62,17 @@ export const getLandPart = async (landPartId: TLandPartId) => {
 export const getAllLandOwnershipQuery = evolu.createQuery((db) =>
     db.selectFrom("landOwnership")
         .select(["id", "subjectId", "landPartId", "share"])
-        .where("isDeleted", "is not", 1), queryOptions,
+        .where("isDeleted", "is not", 1)
+        .select((eb) => [
+            kysely.jsonObjectFrom(eb.selectFrom("subject")
+                .select(["id", "firstName", "lastName"])
+                .whereRef("id", "=", "landOwnership.subjectId"))
+                .as("subjectName"),
+            kysely.jsonObjectFrom(eb.selectFrom("landPart")
+                .select(["certificateOfOwnership", "plotDimensions"])
+                .whereRef("id", "=", "landOwnership.landPartId"))
+                .as("landPart"),
+        ]), queryOptions,
 );
 export type TAllLandOwnershipRow = typeof getAllLandOwnershipQuery.Row;
 
@@ -66,3 +87,22 @@ export const getLandOwnership = async (landOwnershipId: TLandOwnershipId) => {
     );
     return landOwnershipRows;
 }
+
+/*
+export const getAllSubjectsQuery = evolu.createQuery((db) =>
+    db.selectFrom("subject")
+        .select(["id", "name", "surname"])
+        .where("isDeleted", "is not", 1)
+        .select((eb) => [
+            kysely.jsonObjectFrom(
+                eb.selectFrom("address")
+                .select(["city", "postCode", "street"])
+                .where("isDeleted", "is not", 1)
+                .whereRef("id", "=", "subject.addressId")
+            )
+                .as("address")
+        ]), queryOptions,
+);
+
+export type TAllSubjectsRow = typeof getAllSubjectsQuery.Row;
+*/

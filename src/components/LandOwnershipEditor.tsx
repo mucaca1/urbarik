@@ -22,6 +22,7 @@ interface FormValues {
     subjectId: TSubjectId | null;
     landPartId: TLandPartId | null;
     share: number;
+    ownedPercentage: number;
 }
 
 const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnershipId, showDialog, editorType, setShowDialog }) => {
@@ -36,7 +37,8 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
         defaultValues: {
             subjectId: null,
             landPartId: null,
-            share: 0
+            share: 0,
+            ownedPercentage: 0
         }
     });
 
@@ -145,7 +147,7 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
                             name="share"
                             control={control}
                             render={({ field }) => (
-                                <FractionInput {...field} label="Fraction" required />
+                                <FractionInput {...field} value={field.value} onChange={field.onChange} label="Fraction" required />
                             )}
                         />
                     </Box>

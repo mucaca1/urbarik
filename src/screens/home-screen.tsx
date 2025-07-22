@@ -12,6 +12,7 @@ import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import AddOptionsButton from "../components/EditorOptionsButtonBar";
 import { useUnit } from "../context/UnitContext";
 import { fromBaseUnit } from "../utils/unitConversion";
+import { formatFraction } from "../utils/fraction";
 
 const subjectColumns: GridColDef[] = [
     { field: 'firstName', headerName: 'First name', width: 250},
@@ -68,11 +69,19 @@ export const HomeScreen: React.FC = () => {
             {
                 id: row.id,
                 certificateOfOwnership: row.certificateOfOwnership,
-                plotDimensions: fromBaseUnit(row.plotDimensions | 0, unit).toString() + " " + unitAsString(unit)
+                plotDimensions: fromBaseUnit(row.plotDimensions || 0, unit).toString() + " " + unitAsString(unit)
             }
         ));
     } else if (table === "landOwnership") {
         const landOwnerships: QueryRows<TAllLandOwnershipRow> = useQuery(getAllLandOwnershipQuery);
+        rows = landOwnerships.map((row: TAllLandOwnershipRow) => (
+            {
+                id: row.id,
+                landPart: row.landPart ? `${row.landPart.certificateOfOwnership || ""} (${fromBaseUnit(row.landPart.plotDimensions || 0, unit)} ${unitAsString(unit) })` : "",
+                subject: row.subjectName ? `${row.subjectName.firstName || ""} ${row.subjectName.lastName || ""}` : "",
+                fraction: `${formatFraction(row.share as number)} (${row.landPart?.plotDimensions ? fromBaseUnit(row.share as number * row.landPart.plotDimensions as number || 0, unit) + " " + unitAsString(unit) : ""})`
+            }
+        ));
     }
 
     return (

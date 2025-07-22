@@ -40,13 +40,13 @@ export const Subject = {
     city: nullOr(NonEmptyString50)
 };
 
-const LandPart = {
+export const LandPart = {
     id: LandPartId,
     certificateOfOwnership: NonEmptyString50,
     plotDimensions: NonNegativeNumber
 }
 
-const LandOwnership = {
+export const LandOwnership = {
     id: LandOwnershipId,
     subjectId: SubjectId,
     landPartId: LandPartId,

@@ -5,11 +5,9 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material';
-import { evolu, TSubjectId } from '../evolu-db';
+import { TSubjectId } from '../evolu-db';
 import { getAllSubjectsQuery, TAllSubjectsRow } from '../evolu-queries';
-import { QueryRows } from '@evolu/common';
 import { useQuery } from '@evolu/react';
-import { ControllerRenderProps } from 'react-hook-form';
 
 interface SubjectPickerProps {
     disabled?: boolean;
