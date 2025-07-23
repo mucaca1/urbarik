@@ -8,16 +8,13 @@ import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import EditIcon from '@mui/icons-material/Edit';
 import { TSubjectId, TLandPartId, TLandOwnershipId } from '../evolu-db';
 import { EditorType } from '../types';
-import SubjectEditor from './SubjectEditor';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useEvolu } from '@evolu/react';
 import { notifyError, notifySuccess } from '../utils/toastNotification';
-import LandPartEditor from './LandPartEditor';
-import LandOwnershipEditor from './LandOwnershipEditor';
 import EditorDialog from './EditorDialog';
-import SubjectEditorNew from './SubjectEditorNew';
-import LandPartEditorNew from './LandPartEditorNew';
-import LandOwnershipEditorNew from './LandOwnershipEditorNew';
+import SubjectEditorNew from './SubjectEditor';
+import LandPartEditorNew from './LandPartEditor';
+import LandOwnershipEditorNew from './LandOwnershipEditor';
 
 interface EditorOptionsButtonBarProps {
     dialogObject: {

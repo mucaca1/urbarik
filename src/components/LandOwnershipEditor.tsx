@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, TextField } from "@mui/material";
 import { Transition } from "../utils/transition";
 import { useEvolu } from "@evolu/react";
 import { notifyError, notifySuccess } from "../utils/toastNotification";
@@ -10,13 +10,14 @@ import { EditorType } from "../types";
 import FractionInput from "./FractionInput";
 import SubjectPicker from "./SubjectPicker";
 import LandPartPicker from "./LandPartPicker";
-import { use, useEffect } from "react";
+import { JSX, use, useEffect, useState } from "react";
 
 interface LandOwnershipEditorProps {
     landOwnershipId: TLandOwnershipId | null,
-    showDialog: boolean,
     editorType: EditorType | null,
-    setShowDialog: (v: boolean) => void,
+    onClose: () => void,
+    isEditorShowed: boolean,
+    formButtons?: JSX.Element;
 }
 
 interface FormValues {
@@ -26,21 +27,15 @@ interface FormValues {
     ownedPercentage: number;
 }
 
-const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnershipId, showDialog, editorType, setShowDialog }) => {
-    // todo - refactor all editors!!
-    //        All editors will be wrapped in dialog component. That prevent multy rendering before dialog was opened.
-    //        Specific form will be created only when dialog is opened.
-    //        Dialog will be closed only when form is submitted or canceled.
-    //        That also fix toast nottification issue. (multiple toasts on form submit)
-    //        Dialog can be oppened from anywhere in the app!
+const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnershipId, editorType, onClose, isEditorShowed, formButtons = (<></>) }) => {
     const { insert, update } = useEvolu();
+        const [loadingData, setLoadingData] = useState(false);
 
     const {
         control,
         handleSubmit,
         reset,
-        setValue,
-        watch
+        setValue
     } = useForm<FormValues>({
         defaultValues: {
             subjectId: null,
@@ -51,31 +46,37 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
     });
     
     useEffect(() => {
-        // Reset form values based on type
-        if (editorType === "create") {
-            setValue('subjectId', null);
-            setValue('landPartId', null);
-            setValue('share', 0);
+        if (isEditorShowed) {
+            // Reset form values based on type
+            if (editorType === "create") {
+                setValue('subjectId', null);
+                setValue('landPartId', null);
+                setValue('share', 0);
+            }
+
+            // Fetch subject data if editing
+            if (editorType === "edit" && landOwnershipId) {
+                setLoadingData(true);
+                getLandOwnership(landOwnershipId).then((result) => {
+                    const landOwnership = result[0];
+                    if (landOwnership) {
+                        setValue('subjectId', landOwnership.subjectId as TSubjectId);
+                        setValue('landPartId', landOwnership.landPartId as TLandPartId);
+                        setValue('share', landOwnership.share as number);
+                    } else {
+                        notifyError("Land ownership not found");
+                    }
+                    console.log("Fetched land ownership:", result);
+                    setLoadingData(false);
+                }).catch((error) => {
+                    console.error("Error fetching land ownership:", error);
+                    notifyError("Failed to fetch land ownership");
+                    setLoadingData(false);
+                });
+            }
         }
 
-        // Fetch subject data if editing
-        if (editorType === "edit" && landOwnershipId) {
-            getLandOwnership(landOwnershipId).then((result) => {
-                const landOwnership = result[0];
-                if (landOwnership) {
-                    setValue('subjectId', landOwnership.subjectId as TSubjectId);
-                    setValue('landPartId', landOwnership.landPartId as TLandPartId);
-                    setValue('share', landOwnership.share as number);
-                } else {
-                    notifyError("Land ownership not found");
-                }
-                console.log("Fetched land ownership:", result);
-            }).catch((error) => {
-                console.error("Error fetching land ownership:", error);
-                notifyError("Failed to fetch land ownership");
-            });
-        }
-    }, [editorType, landOwnershipId]);
+    }, [isEditorShowed]);
 
     const landPartId = useWatch({
         control,
@@ -100,7 +101,7 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
                 console.log("Land ownership updated successfully:", landPartUpdateResult);
                 notifySuccess("Successfully updated");
                 reset();
-                setShowDialog(false);
+                onClose();
             } else {
                 console.error("Error updating land part:", landPartUpdateResult.error);
                 notifyError("Update failed");
@@ -117,7 +118,7 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
                 console.log("Land ownership stored successfully:", landPartInsertResult);
                 notifySuccess("Successfully stored");
                 reset();
-                setShowDialog(false);
+                onClose();
             } else {
                 console.error("Error storing land part:", landPartInsertResult.error);
                 notifyError("Stored failed");
@@ -125,61 +126,42 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
         }
     };
 
-    return (<div>
-        <ToastContainer />
-        <Dialog
-            open={showDialog}
-            aria-labelledby="scroll-dialog-title"
-            slots={{
-                transition: Transition,
-            }}
-            keepMounted
-            onClose={() => setShowDialog(false)}
-            aria-describedby="alert-dialog-slide-description"
-        >
-            <DialogTitle id="scroll-dialog-title">{"Land ownership"}</DialogTitle>
+    return (
+        <form onSubmit={handleSubmit(onSubmit)}>
+            <Box
+                display="flex"
+                flexDirection={{ xs: 'column', sm: 'column' }}
+                gap={2}
+                paddingTop="5%"
+            >
+                {loadingData  && <LinearProgress />}
+                <Controller
+                    name="landPartId"
+                    control={control}
+                    render={({ field }) => (
+                        <LandPartPicker {...field} />
+                    )}
+                />
+                <Controller
+                    name="subjectId"
+                    control={control}
+                    render={({ field }) => (
+                        <SubjectPicker {...field} />
+                    )}
+                />
+                <Controller
+                    name="share"
+                    control={control}
+                    render={({ field }) => (
+                        <FractionInput {...field} value={field.value} onChange={field.onChange} label="Fraction" required />
+                    )}
+                />
+            </Box>
 
-            <DialogContent>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <Box
-                        display="flex"
-                        flexDirection={{ xs: 'column', sm: 'column' }}
-                        gap={2}
-                        paddingTop="5%"
-                    >
-                        <Controller
-                            name="landPartId"
-                            control={control}
-                            render={({ field }) => (
-                                <LandPartPicker {...field} />
-                            )}
-                        />
-                        <Controller
-                            name="subjectId"
-                            control={control}
-                            render={({ field }) => (
-                                <SubjectPicker {...field} />
-                            )}
-                        />
-                        <Controller
-                            name="share"
-                            control={control}
-                            render={({ field }) => (
-                                <FractionInput {...field} value={field.value} onChange={field.onChange} label="Fraction" required />
-                            )}
-                        />
-                    </Box>
+            {formButtons}
 
-                    <DialogActions>
-                        <Button onClick={() => setShowDialog(false)}>Cancel</Button>
-                        <Button type="submit" variant="contained">
-                            Save
-                        </Button>
-                    </DialogActions>
-                </form>
-            </DialogContent>
-        </Dialog>
-    </div>);
+        </form>
+    );
 }
 
 export default LandOwnershipEditor;

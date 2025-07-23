@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, TextField, Typography } from "@mui/material";
 import { Transition } from "../utils/transition";
 import { useEvolu, useQuery } from "@evolu/react";
 import { notifyError, notifySuccess } from "../utils/toastNotification";
@@ -7,12 +7,14 @@ import { ToastContainer } from "react-toastify";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { getSubject } from "../evolu-queries";
 import { EditorType } from "../types";
+import { JSX, useEffect, useState } from "react";
 
 interface SubjectEditorProps {
     subjectId: TSubjectId | null,
-    showDialog: boolean,
     editorType: EditorType | null,
-    setShowDialog: (v: boolean) => void,
+    onClose: () => void
+    isEditorShowed: boolean
+    formButtons?: JSX.Element;
 }
 
 interface FormValues {
@@ -25,8 +27,9 @@ interface FormValues {
     city: string;
 }
 
-const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, editorType, setShowDialog }) => {
+const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, editorType, onClose, isEditorShowed, formButtons = (<></>) }) => {
     const { insert, update } = useEvolu();
+    const [loadingData, setLoadingData] = useState(false);
 
     const {
         control,
@@ -45,38 +48,47 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ed
         }
     });
 
-    // Reset form values based on type
-    if (editorType === "create") {
-        setValue('firstName', '');
-        setValue('lastName', '');
-        setValue('nationalIdentificationNumber', '');
-        setValue('street', '');
-        setValue('houseNumber', '');
-        setValue('postcode', '');
-        setValue('city', '');
-    }
+    useEffect(() => {
+        if (isEditorShowed) {
+            // Reset form values based on type
+            if (editorType === "create") {
+                setValue('firstName', '');
+                setValue('lastName', '');
+                setValue('nationalIdentificationNumber', '');
+                setValue('street', '');
+                setValue('houseNumber', '');
+                setValue('postcode', '');
+                setValue('city', '');
+            }
 
-    // Fetch subject data if editing
-    if (editorType === "edit" && subjectId) {
-        getSubject(subjectId).then((result) => {
-                const subject = result[0];
-                if (subject) {
-                    setValue('firstName', subject.firstName as string);
-                    setValue('lastName', subject.lastName as string);
-                    setValue('nationalIdentificationNumber', subject.nationalIdNumber as string);
-                    setValue('street', subject.street as string || '');
-                    setValue('houseNumber', subject.houseNumber as string || '');
-                    setValue('postcode', subject.postCode as string || '');
-                    setValue('city', subject.city as string || '');
-                } else {
-                    notifyError("Subject not found");
-                }
-            console.log("Fetched subject:", result);
-        }).catch((error) => {
-            console.error("Error fetching subject:", error);
-            notifyError("Failed to fetch subject data");
-        });
-    }
+            // Fetch subject data if editing
+            if (editorType === "edit" && subjectId) {
+                setLoadingData(true);
+                getSubject(subjectId).then((result) => {
+                    const subject = result[0];
+                    if (subject) {
+                        setValue('firstName', subject.firstName as string);
+                        setValue('lastName', subject.lastName as string);
+                        setValue('nationalIdentificationNumber', subject.nationalIdNumber as string);
+                        setValue('street', subject.street as string || '');
+                        setValue('houseNumber', subject.houseNumber as string || '');
+                        setValue('postcode', subject.postCode as string || '');
+                        setValue('city', subject.city as string || '');
+                    } else {
+                        notifyError("Subject not found");
+                    }
+                    console.log("Fetched subject:", result);
+
+                    setLoadingData(false);
+                }).catch((error) => {
+                    console.error("Error fetching subject:", error);
+                    notifyError("Failed to fetch subject data");
+
+                    setLoadingData(false);
+                });
+            }
+        }
+    }, [isEditorShowed]);
 
     const onSubmit: SubmitHandler<FormValues> = (data) => {
         const street = nullEmptyValue(data.street);
@@ -98,7 +110,6 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ed
                 console.log("Subject updated successfully:", subjectUpdateResult);
                 notifySuccess("Successfully updated");
                 reset();
-                setShowDialog(false);
             } else {
                 console.error("Error updating subject:", subjectUpdateResult.error);
                 notifyError("Update failed");
@@ -113,110 +124,91 @@ const SubjectEditor: React.FC<SubjectEditorProps> = ({ subjectId, showDialog, ed
                 console.log("Subject stored successfully:", subjectInsertResult);
                 notifySuccess("Successfully stored");
                 reset();
-                setShowDialog(false);
             } else {
                 console.error("Error storing subject:", subjectInsertResult.error);
                 notifyError("Stored failed");
             }
         }
+        onClose();
     };
 
-    return (<div>
-        <ToastContainer />
-        <Dialog
-            open={showDialog}
-            aria-labelledby="scroll-dialog-title"
-            slots={{
-                transition: Transition,
-            }}
-            keepMounted
-            onClose={() => setShowDialog(false)}
-            aria-describedby="alert-dialog-slide-description"
-        >
-            <DialogTitle id="scroll-dialog-title">{"Subject"}</DialogTitle>
+    return (
+        <form onSubmit={handleSubmit(onSubmit)}>
+            <Box
+                display="flex"
+                flexDirection={{ xs: 'column', sm: 'column' }}
+                gap={2}
+                paddingTop="5%"
+            >
+                {loadingData  && <LinearProgress />}
+                <Controller
+                    name="firstName"
+                    control={control}
+                    render={({ field }) => (
+                        <TextField {...field} label="First name" fullWidth required />
+                    )}
+                />
+                <Controller
+                    name="lastName"
+                    control={control}
+                    render={({ field }) => (
+                        <TextField {...field} label="Last name" fullWidth required />
+                    )}
+                />
+                <Controller
+                    name="nationalIdentificationNumber"
+                    control={control}
+                    render={({ field }) => (
+                        <TextField
+                            {...field}
+                            label="National identification number"
+                            fullWidth
+                            required
+                        />
+                    )}
+                />
 
-            <DialogContent>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <Box
-                        display="flex"
-                        flexDirection={{ xs: 'column', sm: 'column' }}
-                        gap={2}
-                        paddingTop="5%"
-                    >
-                        <Controller
-                            name="firstName"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField {...field} label="First name" fullWidth required />
-                            )}
-                        />
-                        <Controller
-                            name="lastName"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField {...field} label="Last name" fullWidth required />
-                            )}
-                        />
-                        <Controller
-                            name="nationalIdentificationNumber"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    label="National identification number"
-                                    fullWidth
-                                    required
-                                />
-                            )}
-                        />
+                <Typography variant="h6">Address</Typography>
 
-                        <Typography variant="h6">Address</Typography>
+                <Controller
+                    name="street"
+                    control={control}
+                    render={({ field }) => (
+                        <TextField {...field} label="Street" fullWidth />
+                    )}
+                />
+                <Controller
+                    name="houseNumber"
+                    control={control}
+                    render={({ field }) => (
+                        <TextField {...field} label="House number" fullWidth />
+                    )}
+                />
+                <Controller
+                    name="postcode"
+                    control={control}
+                    render={({ field }) => (
+                        <TextField
+                            {...field}
+                            label="Postcode"
+                            type="number"
+                            fullWidth
+                        />
+                    )}
+                />
+                <Controller
+                    name="city"
+                    control={control}
+                    render={({ field }) => (
+                        <TextField {...field} label="City" fullWidth />
+                    )}
+                />
+            </Box>
 
-                        <Controller
-                            name="street"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField {...field} label="Street" fullWidth />
-                            )}
-                        />
-                        <Controller
-                            name="houseNumber"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField {...field} label="House number" fullWidth />
-                            )}
-                        />
-                        <Controller
-                            name="postcode"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    label="Postcode"
-                                    type="number"
-                                    fullWidth
-                                />
-                            )}
-                        />
-                        <Controller
-                            name="city"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField {...field} label="City" fullWidth />
-                            )}
-                        />
-                    </Box>
+            {formButtons}
 
-                    <DialogActions>
-                        <Button onClick={() => setShowDialog(false)}>Cancel</Button>
-                        <Button type="submit" variant="contained">
-                            Save
-                        </Button>
-                    </DialogActions>
-                </form>
-            </DialogContent>
-        </Dialog>
-    </div>);
+        </form>
+    );
 }
 
 const nullEmptyValue = (value: string): string | null => {
