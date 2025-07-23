@@ -4,12 +4,13 @@ import { useEvolu } from "@evolu/react";
 import { notifyError, notifySuccess } from "../utils/toastNotification";
 import { TLandOwnershipId, TLandPartId, TSubjectId } from "../evolu-db";
 import { ToastContainer } from "react-toastify";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { getLandOwnership } from "../evolu-queries";
 import { EditorType } from "../types";
 import FractionInput from "./FractionInput";
 import SubjectPicker from "./SubjectPicker";
 import LandPartPicker from "./LandPartPicker";
+import { use, useEffect } from "react";
 
 interface LandOwnershipEditorProps {
     landOwnershipId: TLandOwnershipId | null,
@@ -26,13 +27,20 @@ interface FormValues {
 }
 
 const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnershipId, showDialog, editorType, setShowDialog }) => {
+    // todo - refactor all editors!!
+    //        All editors will be wrapped in dialog component. That prevent multy rendering before dialog was opened.
+    //        Specific form will be created only when dialog is opened.
+    //        Dialog will be closed only when form is submitted or canceled.
+    //        That also fix toast nottification issue. (multiple toasts on form submit)
+    //        Dialog can be oppened from anywhere in the app!
     const { insert, update } = useEvolu();
 
     const {
         control,
         handleSubmit,
         reset,
-        setValue
+        setValue,
+        watch
     } = useForm<FormValues>({
         defaultValues: {
             subjectId: null,
@@ -41,31 +49,41 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
             ownedPercentage: 0
         }
     });
+    
+    useEffect(() => {
+        // Reset form values based on type
+        if (editorType === "create") {
+            setValue('subjectId', null);
+            setValue('landPartId', null);
+            setValue('share', 0);
+        }
 
-    // Reset form values based on type
-    if (editorType === "create") {
-        setValue('subjectId', null);
-        setValue('landPartId', null);
-        setValue('share', 0);
-    }
+        // Fetch subject data if editing
+        if (editorType === "edit" && landOwnershipId) {
+            getLandOwnership(landOwnershipId).then((result) => {
+                const landOwnership = result[0];
+                if (landOwnership) {
+                    setValue('subjectId', landOwnership.subjectId as TSubjectId);
+                    setValue('landPartId', landOwnership.landPartId as TLandPartId);
+                    setValue('share', landOwnership.share as number);
+                } else {
+                    notifyError("Land ownership not found");
+                }
+                console.log("Fetched land ownership:", result);
+            }).catch((error) => {
+                console.error("Error fetching land ownership:", error);
+                notifyError("Failed to fetch land ownership");
+            });
+        }
+    }, [editorType, landOwnershipId]);
 
-    // Fetch subject data if editing
-    if (editorType === "edit" && landOwnershipId) {
-        getLandOwnership(landOwnershipId).then((result) => {
-            const landOwnership = result[0];
-            if (landOwnership) {
-                setValue('subjectId', landOwnership.subjectId as TSubjectId);
-                setValue('landPartId', landOwnership.landPartId as TLandPartId);
-                setValue('share', landOwnership.share as number);
-            } else {
-                notifyError("Land ownership not found");
-            }
-            console.log("Fetched land ownership:", result);
-        }).catch((error) => {
-            console.error("Error fetching land ownership:", error);
-            notifyError("Failed to fetch land ownership");
-        });
-    }
+    const landPartId = useWatch({
+        control,
+        name: 'landPartId',
+    });
+    useEffect(() => {
+        console.log('Values changed:', landPartId);
+    }, [landPartId]);
 
     const onSubmit: SubmitHandler<FormValues> = (data) => {
         let landPart: TLandPartId | null = data.landPartId;

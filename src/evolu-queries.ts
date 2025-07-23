@@ -59,6 +59,22 @@ export const getLandPart = async (landPartId: TLandPartId) => {
     return landPartRows;
 }
 
+export const getLandPartWithOwnership = async (landPartId: TLandPartId) => {
+    const landPartRows: QueryRows = await evolu.loadQuery(
+        evolu.createQuery((db) =>
+            db.selectFrom("landPart")
+                .leftJoin("landOwnership", (join) => join.onRef("landPart.id", "=", "landOwnership.landPartId"))
+                .leftJoin("subject", (join) => join.onRef("subject.id", "=", "landOwnership.subjectId"))
+                .select(["landPart.id", "landPart.certificateOfOwnership", "landPart.plotDimensions",
+                    "landOwnership.share",
+                    "subject.firstName", "subject.lastName", "subject.nationalIdNumber"])
+                .where("isDeleted", "is not", 1)
+                .where("id", "=", landPartId).limit(1), queryOptions,
+        )
+    );
+    return landPartRows;
+}
+
 export const getAllLandOwnershipQuery = evolu.createQuery((db) =>
     db.selectFrom("landOwnership")
         .select(["id", "subjectId", "landPartId", "share"])

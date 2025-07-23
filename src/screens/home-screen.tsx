@@ -87,7 +87,12 @@ export const HomeScreen: React.FC = () => {
     return (
         <div>
             <h1>{t('home')}</h1>
-            <AddOptionsButton subjectId={selectedSubject} landPartId={selectedLandPart} ownershipId={selectedLandOwnership}/>
+            <AddOptionsButton dialogObject={
+                {
+                    value: table === "subject" ? selectedSubject : table === "landPart" ? selectedLandPart : selectedLandOwnership,
+                    type: table
+                }
+            }/>
             <ToggleButtonGroup
                 value={table}
                 exclusive

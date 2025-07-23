@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Fab, Tooltip, Zoom } from '@mui/material';
+import React, { JSX, useEffect, useState } from 'react';
+import { Box, Button, DialogActions, Fab, Tooltip, Zoom } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -14,70 +14,93 @@ import { useEvolu } from '@evolu/react';
 import { notifyError, notifySuccess } from '../utils/toastNotification';
 import LandPartEditor from './LandPartEditor';
 import LandOwnershipEditor from './LandOwnershipEditor';
+import EditorDialog from './EditorDialog';
+import SubjectEditorNew from './SubjectEditorNew';
+import LandPartEditorNew from './LandPartEditorNew';
+import LandOwnershipEditorNew from './LandOwnershipEditorNew';
 
 interface EditorOptionsButtonBarProps {
-    subjectId: TSubjectId | null,
-    landPartId: TLandPartId | null,
-    ownershipId: TLandOwnershipId | null,
+    dialogObject: {
+        value: TSubjectId | TLandPartId | TLandOwnershipId | null;
+        type: "subject" | "landPart" | "landOwnership" | null;
+    }
 }
 
-const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ subjectId, landPartId, ownershipId }) => {
+const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ dialogObject }) => {
     const { update } = useEvolu();
-    const [subjectEditor, setSubjectEditor] = useState<{visible: boolean, editorType: EditorType | null}>({visible: false, editorType: null});
-    const [landPartEditor, setLandPartEditor] = useState<{ visible: boolean, editorType: EditorType | null }>({ visible: false, editorType: null });
-    const [ownershipEditor, setOwnershipEditor] = useState<{ visible: boolean, editorType: EditorType | null }>({ visible: false, editorType: null });
+    const [showEditor, setShowEditor] = useState<boolean>(false);
     const [addOpen, setAddOpen] = useState<boolean>(false);
     const [modifyOpen, setModifyOpen] = useState<boolean>(false);
+    
+    const [editorType, setEditorType] = useState<EditorType | null>(null);
+    const [objectTypeToEdit, setObjectTypeToEdit] = useState<"subject" | "landPart" | "landOwnership" | null>(null);
 
     useEffect(() => {
-        setModifyOpen(subjectId !== null || landPartId !== null || ownershipId !== null);
-    }, [subjectId, landPartId, ownershipId]);
+        setModifyOpen(dialogObject.value !== null);
+    }, [dialogObject]);
 
     const handleToggle = () => {
         setAddOpen((prev) => !prev);
     };
 
-    const setShowModifyEditor = (show: boolean, editorType?: EditorType) => {
-        if (subjectId !== null) {
-            setSubjectEditor({ visible: show, editorType: editorType ? editorType : null });
-        } else if (landPartId !== null) {
-            setLandPartEditor({ visible: show, editorType: editorType ? editorType : null });
-        } else if (ownershipId !== null) {
-            setOwnershipEditor({ visible: show, editorType: editorType ? editorType : null });
+    const setShowModifyEditor = (show: boolean) => {
+        setEditorType("edit");
+        if (dialogObject.type === "subject") {
+            setObjectTypeToEdit("subject");
         }
+        else if (dialogObject.type === "landPart") {
+            setObjectTypeToEdit("landPart");
+        } else if (dialogObject.type === "landOwnership") {
+            setObjectTypeToEdit("landOwnership");
+        }
+        setShowEditor(show);
     }
 
-    const setShowAddSubject = (show: boolean, editorType?: EditorType) => {
-        setSubjectEditor({ visible: show, editorType: editorType ? editorType : null });
+    const setShowAddSubject = () => {
+        setEditorType("create");
+        setObjectTypeToEdit("subject");
+        setShowEditor(true);
     }
 
-    const setShowAddLandPart = (show: boolean, editorType?: EditorType) => {
-        setLandPartEditor({ visible: show, editorType: editorType ? editorType : null });
+    const setShowAddLandPart = () => {
+        setEditorType("create");
+        setObjectTypeToEdit("landPart");
+        setShowEditor(true);
     }
 
-    const setShowAddLandOwnership = (show: boolean, editorType?: EditorType) => {
-        setOwnershipEditor({ visible: show, editorType: editorType ? editorType : null });
+    const setShowAddLandOwnership = () => {
+        setEditorType("create")
+        setObjectTypeToEdit("landOwnership");
+        setShowEditor(true);
     }
+
+    const dialogActions: JSX.Element = (
+        <DialogActions>
+            <Button onClick={() => setShowEditor(false)}>Cancel</Button>
+            <Button type="submit" variant="contained">
+                Save
+            </Button>
+        </DialogActions>
+    );
 
     return (
         <div>
-            <SubjectEditor
-                subjectId={subjectId}
-                showDialog={subjectEditor.visible}
-                editorType={subjectEditor.editorType}
-                setShowDialog={setShowAddSubject}
-            />
-            <LandPartEditor
-                landPartId={landPartId}
-                showDialog={landPartEditor.visible}
-                editorType={landPartEditor.editorType}
-                setShowDialog={setShowAddLandPart}
-            />
-            <LandOwnershipEditor
-                landOwnershipId={ownershipId}
-                showDialog={ownershipEditor.visible}
-                editorType={ownershipEditor.editorType}
-                setShowDialog={setShowAddLandOwnership}
+            <EditorDialog
+                title={objectTypeToEdit === "subject" ? "Subject Editor" : objectTypeToEdit === "landPart" ? "Land Part Editor" : objectTypeToEdit === "landOwnership" ? "Land Ownership Editor" : "Editor"}
+                showDialog={showEditor}
+                setShowDialog={(show) => {
+                    setShowEditor(show);
+                }}
+                dialogContent={() => {
+                    if (objectTypeToEdit === "subject") {
+                        return <SubjectEditorNew subjectId={dialogObject.value as TSubjectId} editorType={editorType} onClose={() => setShowEditor(false)} isEditorShowed={showEditor} formButtons={dialogActions}/>;
+                    } else if (objectTypeToEdit === "landPart") {
+                        return <LandPartEditorNew landPartId={dialogObject.value as TLandPartId} editorType={editorType} onClose={() => setShowEditor(false)} isEditorShowed={showEditor} formButtons={dialogActions} />;
+                    } else if (objectTypeToEdit === "landOwnership") {
+                        return <LandOwnershipEditorNew landOwnershipId={dialogObject.value as TLandOwnershipId} editorType={editorType} onClose={() => setShowEditor(false)} isEditorShowed={showEditor} formButtons={dialogActions} />;
+                    }
+                    return <>No content</>;
+                }}
             />
             <Box
                 sx={{
@@ -103,7 +126,7 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ subject
                 <Zoom in={addOpen}>
                     <Tooltip title="Add subject" placement="bottom">
                         <Fab
-                            onClick={() => setShowAddSubject(true, "create")}
+                            onClick={setShowAddSubject}
                             color="success"
                             size="medium"
                             sx={{ marginLeft: 1 }}
@@ -116,7 +139,7 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ subject
                 <Zoom in={addOpen} style={{ transitionDelay: addOpen ? '50ms' : '0ms' }}>
                     <Tooltip title="Add land part" placement="bottom">
                         <Fab
-                            onClick={() => setShowAddLandPart(true, "create")}
+                            onClick={setShowAddLandPart}
                             color="success"
                             size="medium"
                             sx={{ marginLeft: 1 }}
@@ -129,7 +152,7 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ subject
                 <Zoom in={addOpen} style={{ transitionDelay: addOpen ? '100ms' : '0ms' }}>
                     <Tooltip title="Add ownership" placement="bottom">
                         <Fab
-                            onClick={() => setShowAddLandOwnership(true, "create")}
+                            onClick={setShowAddLandOwnership}
                             color="success"
                             size="medium"
                             sx={{ marginLeft: 1 }}
@@ -145,7 +168,7 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ subject
                         }}>
                         <Tooltip title="Modify" placement="bottom">
                             <Fab
-                                onClick={() => setShowModifyEditor(true, "edit")}
+                                onClick={() => setShowModifyEditor(true)}
                                 color="primary"
                                 size="large"
                                 sx={{ marginLeft: 1 }}
@@ -160,8 +183,12 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ subject
                         <Tooltip title="Delete" placement="bottom">
                             <Fab
                                 onClick={() => {
-                                    if (subjectId != null) {
-                                        const subjectUdeleteResult = update("subject", { id: subjectId, isDeleted: true })
+                                    if (dialogObject.value === null) {
+                                        notifyError("No object selected for deletion");
+                                        return;
+                                    }
+                                    if (dialogObject.type === "subject") {
+                                        const subjectUdeleteResult = update("subject", { id: dialogObject.value, isDeleted: true })
                                         if (subjectUdeleteResult.ok) {
                                             console.log("Subject deleted successfully:", subjectUdeleteResult);
                                             notifySuccess("Successfully deleted");
@@ -169,8 +196,8 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ subject
                                             console.error("Error deleting subject:", subjectUdeleteResult.error);
                                             notifyError("Delete failed");
                                         }
-                                    } else if (landPartId != null) {
-                                        const landPartDeleteResult = update("landPart", { id: landPartId, isDeleted: true })
+                                    } else if (dialogObject.type === "landPart") {
+                                        const landPartDeleteResult = update("landPart", { id: dialogObject.value, isDeleted: true })
                                         if (landPartDeleteResult.ok) {
                                             console.log("Land part deleted successfully:", landPartDeleteResult);
                                             notifySuccess("Successfully deleted");
@@ -178,8 +205,8 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ subject
                                             console.error("Error deleting land part:", landPartDeleteResult.error);
                                             notifyError("Delete failed");
                                         }
-                                    } else if (ownershipId != null) {
-                                        const ownershipDeleteResult = update("landOwnership", { id: ownershipId, isDeleted: true })
+                                    } else if (dialogObject.type === "landOwnership") {
+                                        const ownershipDeleteResult = update("landOwnership", { id: dialogObject.value, isDeleted: true })
                                         if (ownershipDeleteResult.ok) {
                                             console.log("Ownership deleted successfully:", ownershipDeleteResult);
                                             notifySuccess("Successfully deleted");
