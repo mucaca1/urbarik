@@ -29,24 +29,28 @@ interface FormValues {
 interface Test {
     certificateOfOwnership: string;
     plotDimensions: number;
-    owners: {
-        id: string;
-        name: string;
-        share: number;
-    }[];
+    owners: Owner[];
+}
+
+interface Owner {
+    subjectId: TSubjectId
+    id: string;
+    name: string;
+    share: number; // e.g. 0.5 for 50%
 }
 
 const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnershipId, editorType, onClose, isEditorShowed, formButtons = (<></>) }) => {
     const { insert, update } = useEvolu();
     const [loadingData, setLoadingData] = useState(false);
     const [loadingLandPartData, setLoadingLandPartData] = useState(false);
-    const [landPartData, setLandPartData]: Test | null = useState(null);
+    const [landPartData, setLandPartData] = useState<Test | null>(null);
+    const [maxFreeLandFraction, setMaxFreeLandFraction] = useState<any>(1);
 
     const {
         control,
         handleSubmit,
         reset,
-        setValue
+        setValue,
     } = useForm<FormValues>({
         defaultValues: {
             subjectId: null,
@@ -85,6 +89,10 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
                     setLoadingData(false);
                 });
             }
+
+            if (landPartId && subjectId) {
+                setMaxFreeLandFraction(landPartData !== null ? Math.max(0, 1 - landPartData.owners.filter((o) => editorType === "create" || o.id !== landOwnershipId).reduce((sum, o) => sum + o.share, 0)).toFixed(2) : 1)
+            }
         }
 
     }, [isEditorShowed]);
@@ -92,6 +100,10 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
     const landPartId = useWatch({
         control,
         name: 'landPartId',
+    });
+    const subjectId = useWatch({
+        control,
+        name: 'subjectId',
     });
     useEffect(() => {
         console.log('Values changed:', landPartId);
@@ -103,12 +115,13 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
 
                 let ownersInfo: {
                     id: string;
+                    subjectId: TSubjectId;
                     name: string;
                     share: number;
                 }[] = [];
                 data.forEach((dataRow) => {
                     ownersInfo.push({
-                        id: dataRow.id?.toString() || "", name: `${dataRow.firstName?.toString()} ${dataRow.lastName?.toString()}`, share: dataRow.share as number || 0
+                        id: dataRow.id?.toString() || "", name: `${dataRow.firstName?.toString()} ${dataRow.lastName?.toString()}`, share: dataRow.share as number || 0, subjectId: dataRow.subjectId as TSubjectId
                     }
                     );
                     certificateOfOwnership = dataRow.certificateOfOwnership;
@@ -116,10 +129,13 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
                 });
 
                 setLandPartData({
-                    certificateOfOwnership: certificateOfOwnership,
-                    plotDimensions: plotDimensions,
+                    certificateOfOwnership: certificateOfOwnership || "",
+                    plotDimensions: plotDimensions || 0,
                     owners: ownersInfo
                 })
+                if (subjectId) {
+                    setMaxFreeLandFraction(landPartData !== null ? Math.max(0, 1 - landPartData.owners.filter((o) => editorType === "create" || o.id !== landOwnershipId).reduce((sum, o) => sum + o.share, 0)).toFixed(2) : 1)
+                }
                 setLoadingLandPartData(false);
             }).catch((error) => {
                 console.error("Error fetching land owner data:", error);
@@ -128,7 +144,7 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
         } else {
             setLandPartData(null);
         }
-    }, [landPartId]);
+    }, [landPartId, subjectId]);
 
     const onSubmit: SubmitHandler<FormValues> = (data) => {
         let landPart: TLandPartId | null = data.landPartId;
@@ -197,7 +213,7 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
                     name="share"
                     control={control}
                     render={({ field }) => (
-                        <FractionInput {...field} value={field.value} onChange={field.onChange} label="Fraction" required />
+                        <FractionInput {...field} value={field.value} onChange={field.onChange} label="Fraction" maxValue={maxFreeLandFraction} required />
                     )}
                 />
                 {landPartData && loadingLandPartData && <Skeleton height={100} />}

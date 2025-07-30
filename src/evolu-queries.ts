@@ -67,7 +67,7 @@ export const getLandPartWithOwnership = async (landPartId: TLandPartId) => {
                 .leftJoin("subject", (join) => join.onRef("subject.id", "=", "landOwnership.subjectId"))
                 .select(["landOwnership.id", "landPart.certificateOfOwnership", "landPart.plotDimensions",
                     "landOwnership.share",
-                    "subject.firstName", "subject.lastName", "subject.nationalIdNumber"])
+                    "subject.firstName", "subject.lastName", "subject.nationalIdNumber", "subject.id as subjectId"])
                 .where("landPart.isDeleted", "is not", 1)
                 .where("landPart.id", "=", landPartId), queryOptions,
         )

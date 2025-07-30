@@ -8,19 +8,22 @@ import {
 } from '@mui/material';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { formatFraction, isValidFraction, parseFraction } from '../utils/fraction';
+import { Result, ok, err } from '@evolu/common';
 
 interface FractionInputProps {
   label?: string;
   value?: number | null;
   onChange?: (value: number | null) => void;
   required?: boolean;
+  maxValue?: number
 }
 
 const FractionInput: React.FC<FractionInputProps> = ({
   label = 'Value',
   value = null,
-  onChange,
+  onChange = (v: number | null) => {},
   required = false,
+  maxValue = 1
 }) => {
   const [isFractionMode, setIsFractionMode] = useState(false);
   const [inputValue, setInputValue] = useState<string>(
@@ -29,48 +32,29 @@ const FractionInput: React.FC<FractionInputProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let t: any = null;
     if (value === null || value === undefined) {
       setInputValue('');
     } else {
       const formatted = isFractionMode ? formatFraction(value) : value.toString();
       setInputValue(formatted);
     }
-  }, [value]);
+    const validateResult: Result<number | null, string> = validateInput(value === null || value === undefined ? '' : (isFractionMode ? formatFraction(value) : value.toString()), required, isFractionMode, maxValue);
+    if (!validateResult.ok) {
+      setError(validateResult.error);
+    }
+  }, [value, maxValue]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.trim();
     setInputValue(val);
 
-    if (val === '') {
-      setError(required ? 'Value is required' : null);
-      if (onChange) onChange(null);
-      return;
-    }
-
-    if (isFractionMode) {
-      if (!isValidFraction(val)) {
-        setError('Invalid fraction format (e.g. 3/4)');
-        return;
-      }
-      const parsed = parseFraction(val);
-      if (parsed > 1) {
-        setError('Number value must be between 0 and 1');
-        return;
-      }
+    const validateResult: Result<number | null, string> = validateInput(val, required, isFractionMode, maxValue);
+    if (validateResult.ok) {
       setError(null);
-      if (!isNaN(parsed) && onChange) onChange(parsed);
+      if (onChange) onChange(validateResult.value);
     } else {
-      const parsed = parseFloat(val);
-      if (isNaN(parsed)) {
-        setError('Invalid number');
-        return;
-      }
-      if (parsed > 1) {
-        setError('Number value must be between 0 and 1');
-        return;
-      }
-      setError(null);
-      if (onChange) onChange(parsed);
+      setError(validateResult.error);
     }
   };
 
@@ -113,6 +97,41 @@ const FractionInput: React.FC<FractionInputProps> = ({
     />
   );
 };
+
+interface ValidationError {
+  readonly message: string;
+}
+
+const validateInput = (value: string, required: boolean, isFractionMode: boolean, maxValue: number): Result<number | null, string> => {
+  if (value === '') {
+    if (required) {
+      return err('Value is required')
+    } else {
+      return ok(null);
+    }
+  }
+
+  if (isFractionMode) {
+    if (!isValidFraction(value)) {
+      return err('Invalid fraction format (e.g. 3/4)');
+    }
+    const parsed = parseFraction(value);
+    if (parsed > maxValue) {
+      return err( `Number value must be between 0 and ${maxValue}`);
+    }
+    if (!isNaN(parsed)) return ok(parsed);
+  } else {
+    const parsed = parseFloat(value);
+    if (isNaN(parsed)) {
+      return err('Invalid number')
+    }
+    if (parsed > maxValue) {
+      return err(`Number value must be between 0 and ${maxValue}`)
+    }
+    return ok(parsed);
+  }
+  return err('Undefined parse error');
+}
 
 export default FractionInput;
 export type { FractionInputProps };
