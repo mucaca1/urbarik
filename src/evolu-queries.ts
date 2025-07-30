@@ -1,5 +1,5 @@
 import { evolu, TLandOwnershipId, TLandPartId } from "./evolu-db";
-import { kysely, Query, QueryRows } from "@evolu/common";
+import { kysely, QueryRows } from "@evolu/common";
 import { TSubjectId } from "./evolu-db"
 
 const queryOptions = {
@@ -65,11 +65,11 @@ export const getLandPartWithOwnership = async (landPartId: TLandPartId) => {
             db.selectFrom("landPart")
                 .leftJoin("landOwnership", (join) => join.onRef("landPart.id", "=", "landOwnership.landPartId"))
                 .leftJoin("subject", (join) => join.onRef("subject.id", "=", "landOwnership.subjectId"))
-                .select(["landPart.id", "landPart.certificateOfOwnership", "landPart.plotDimensions",
+                .select(["landOwnership.id", "landPart.certificateOfOwnership", "landPart.plotDimensions",
                     "landOwnership.share",
                     "subject.firstName", "subject.lastName", "subject.nationalIdNumber"])
-                .where("isDeleted", "is not", 1)
-                .where("id", "=", landPartId).limit(1), queryOptions,
+                .where("landPart.isDeleted", "is not", 1)
+                .where("landPart.id", "=", landPartId), queryOptions,
         )
     );
     return landPartRows;

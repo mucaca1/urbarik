@@ -13,6 +13,7 @@ const EditorDialog: React.FC<SubjectEditorProps> = ({ title, showDialog, setShow
     return (<div>
         <ToastContainer />
         <Dialog
+            maxWidth="md"
             open={showDialog}
             aria-labelledby="scroll-dialog-title"
             slots={{

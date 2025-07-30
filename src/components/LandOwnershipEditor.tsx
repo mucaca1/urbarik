@@ -1,16 +1,15 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, TextField } from "@mui/material";
-import { Transition } from "../utils/transition";
+import { Box, LinearProgress, Skeleton } from "@mui/material";
 import { useEvolu } from "@evolu/react";
 import { notifyError, notifySuccess } from "../utils/toastNotification";
 import { TLandOwnershipId, TLandPartId, TSubjectId } from "../evolu-db";
-import { ToastContainer } from "react-toastify";
 import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
-import { getLandOwnership } from "../evolu-queries";
+import { getLandOwnership, getLandPartWithOwnership } from "../evolu-queries";
 import { EditorType } from "../types";
 import FractionInput from "./FractionInput";
 import SubjectPicker from "./SubjectPicker";
 import LandPartPicker from "./LandPartPicker";
-import { JSX, use, useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
+import LandPartInfo from "./LandPartInfo";
 
 interface LandOwnershipEditorProps {
     landOwnershipId: TLandOwnershipId | null,
@@ -27,9 +26,21 @@ interface FormValues {
     ownedPercentage: number;
 }
 
+interface Test {
+    certificateOfOwnership: string;
+    plotDimensions: number;
+    owners: {
+        id: string;
+        name: string;
+        share: number;
+    }[];
+}
+
 const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnershipId, editorType, onClose, isEditorShowed, formButtons = (<></>) }) => {
     const { insert, update } = useEvolu();
-        const [loadingData, setLoadingData] = useState(false);
+    const [loadingData, setLoadingData] = useState(false);
+    const [loadingLandPartData, setLoadingLandPartData] = useState(false);
+    const [landPartData, setLandPartData]: Test | null = useState(null);
 
     const {
         control,
@@ -84,6 +95,39 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
     });
     useEffect(() => {
         console.log('Values changed:', landPartId);
+        if (landPartId) {
+            setLoadingLandPartData(true);
+            getLandPartWithOwnership(landPartId).then((data) => {
+                let certificateOfOwnership = null;
+                let plotDimensions = null;
+
+                let ownersInfo: {
+                    id: string;
+                    name: string;
+                    share: number;
+                }[] = [];
+                data.forEach((dataRow) => {
+                    ownersInfo.push({
+                        id: dataRow.id?.toString() || "", name: `${dataRow.firstName?.toString()} ${dataRow.lastName?.toString()}`, share: dataRow.share as number || 0
+                    }
+                    );
+                    certificateOfOwnership = dataRow.certificateOfOwnership;
+                    plotDimensions = dataRow.plotDimensions;
+                });
+
+                setLandPartData({
+                    certificateOfOwnership: certificateOfOwnership,
+                    plotDimensions: plotDimensions,
+                    owners: ownersInfo
+                })
+                setLoadingLandPartData(false);
+            }).catch((error) => {
+                console.error("Error fetching land owner data:", error);
+                setLoadingLandPartData(false);
+            })
+        } else {
+            setLandPartData(null);
+        }
     }, [landPartId]);
 
     const onSubmit: SubmitHandler<FormValues> = (data) => {
@@ -156,6 +200,12 @@ const LandOwnershipEditor: React.FC<LandOwnershipEditorProps> = ({ landOwnership
                         <FractionInput {...field} value={field.value} onChange={field.onChange} label="Fraction" required />
                     )}
                 />
+                {landPartData && loadingLandPartData && <Skeleton height={100} />}
+                {landPartData && <LandPartInfo
+                    landPartId={landPartData.certificateOfOwnership}
+                    totalSize={landPartData.plotDimensions}
+                    owners={landPartData.owners}
+                />}
             </Box>
 
             {formButtons}

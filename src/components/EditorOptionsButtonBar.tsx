@@ -1,5 +1,5 @@
 import React, { JSX, useEffect, useState } from 'react';
-import { Box, Button, DialogActions, Fab, Tooltip, Zoom } from '@mui/material';
+import { Box, Button, DialogActions, Fab, SpeedDial, SpeedDialAction, SpeedDialIcon, Tooltip, Zoom } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -71,6 +71,28 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ dialogO
         setShowEditor(true);
     }
 
+    const handleDelete = () => {
+        if (dialogObject.value === null) {
+            notifyError("No object selected for deletion");
+            return;
+        }
+
+        let result;
+        if (dialogObject.type === "subject") {
+            result = update("subject", { id: dialogObject.value, isDeleted: true });
+        } else if (dialogObject.type === "landPart") {
+            result = update("landPart", { id: dialogObject.value, isDeleted: true });
+        } else if (dialogObject.type === "landOwnership") {
+            result = update("landOwnership", { id: dialogObject.value, isDeleted: true });
+        }
+
+        if (result?.ok) {
+            notifySuccess("Successfully deleted");
+        } else {
+            notifyError("Delete failed");
+        }
+    };
+
     const dialogActions: JSX.Element = (
         <DialogActions>
             <Button onClick={() => setShowEditor(false)}>Cancel</Button>
@@ -101,121 +123,117 @@ const EditorOptionsButtonBar: React.FC<EditorOptionsButtonBarProps> = ({ dialogO
             />
             <Box
                 sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between', // space between left and right
                     gap: 2,
                     padding: 2,
                     //border: '1px solid #ccc',
                 }}
             >
-                {/* Main toggle button */}
-                <Tooltip title={addOpen ? "Close" : "Add"} placement="bottom">
-                    <Fab
-                        onClick={handleToggle}
-                        color={addOpen ? 'error' : 'success'}
-                        sx={{
-                            transition: 'background-color 0.3s ease',
+                {/* Left: SpeedDial */}
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    {dialogObject.type === "subject" &&
+                        <Tooltip title="Add subject" placement="bottom">
+                            <Fab
+                                onClick={setShowAddSubject}
+                                color="success"
+                                size="large"
+                            >
+                                <PersonAddIcon />
+                            </Fab>
+                        </Tooltip>
+                    }
+                    {dialogObject.type === "landOwnership" &&
+                        <Tooltip title="Add ownership" placement="bottom">
+                            <Fab
+                                onClick={setShowAddLandOwnership}
+                                color="success"
+                                size="large"
+                                sx={{ marginLeft: 1 }}
+                            >
+                                <AddLocationAltIcon />
+                            </Fab>
+                        </Tooltip>
+                    }
+                    {dialogObject.type === "landPart" &&
+                        <Tooltip title="Add land part" placement="bottom">
+                            <Fab
+                                onClick={setShowAddLandPart}
+                                color="success"
+                                size="large"
+                            >
+                                <AddHomeWorkIcon />
+                            </Fab>
+                        </Tooltip>
+                    }
+                    <SpeedDial
+                        ariaLabel="Add actions"
+                        icon={<SpeedDialIcon icon={<AddIcon />} openIcon={<CloseIcon />} />}
+                        onClose={handleToggle}
+                        onOpen={handleToggle}
+                        open={addOpen}
+                        FabProps={{
+                            color: addOpen ? 'error' : 'success',
+                            sx: { transition: 'background-color 0.3s ease' },
+                            size: "medium"
                         }}
+                        direction="right"
                     >
-                        {addOpen ? <CloseIcon /> : <AddIcon />}
-                    </Fab>
-                </Tooltip>
-
-                {/* Sub buttons */}
-                <Zoom in={addOpen}>
-                    <Tooltip title="Add subject" placement="bottom">
-                        <Fab
+                        {dialogObject.type !== "subject" && <SpeedDialAction
+                            icon={<PersonAddIcon color='success' />}
                             onClick={setShowAddSubject}
-                            color="success"
-                            size="medium"
-                            sx={{ marginLeft: 1 }}
-                        >
-                            <PersonAddIcon />
-                        </Fab>
-                    </Tooltip>
-                </Zoom>
-
-                <Zoom in={addOpen} style={{ transitionDelay: addOpen ? '50ms' : '0ms' }}>
-                    <Tooltip title="Add land part" placement="bottom">
-                        <Fab
+                            slotProps={{
+                                fab: {
+                                    sx: {
+                                        bgcolor: 'success',
+                                        '&:hover': {
+                                            bgcolor: 'success',
+                                        }
+                                    }, size: 'medium'
+                                },
+                                tooltip: { title: "Add subject" }
+                            }}
+                        />}
+                        {dialogObject.type !== "landPart" && <SpeedDialAction
+                            icon={<AddHomeWorkIcon color='success' />}
                             onClick={setShowAddLandPart}
-                            color="success"
-                            size="medium"
-                            sx={{ marginLeft: 1 }}
-                        >
-                            <AddHomeWorkIcon />
-                        </Fab>
-                    </Tooltip>
-                </Zoom>
-
-                <Zoom in={addOpen} style={{ transitionDelay: addOpen ? '100ms' : '0ms' }}>
-                    <Tooltip title="Add ownership" placement="bottom">
-                        <Fab
+                            slotProps={{
+                                fab: { color: 'success', size: 'medium' },
+                                tooltip: { title: "Add land part" }
+                            }}
+                        />}
+                        {dialogObject.type !== "landOwnership" && <SpeedDialAction
+                            icon={<AddLocationAltIcon color='success' />}
                             onClick={setShowAddLandOwnership}
-                            color="success"
-                            size="medium"
-                            sx={{ marginLeft: 1 }}
-                        >
-                            <AddLocationAltIcon />
-                        </Fab>
-                    </Tooltip>
-                </Zoom>
+                            slotProps={{
+                                fab: { color: 'success', size: 'medium' },
+                                tooltip: { title: "Add ownership" }
+                            }}
+                        />}
+                    </SpeedDial>
+                </Box>
 
-                <Box sx={{ float: "right" }}>
-                    <Zoom in={modifyOpen} style={{ 
-                            transitionDelay: modifyOpen ? '50ms' : '0ms',
-                        }}>
+                {/* Right: Edit & Delete buttons */}
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Zoom in={modifyOpen} style={{ transitionDelay: modifyOpen ? '50ms' : '0ms' }}>
                         <Tooltip title="Modify" placement="bottom">
                             <Fab
                                 onClick={() => setShowModifyEditor(true)}
                                 color="primary"
                                 size="large"
-                                sx={{ marginLeft: 1 }}
-                                    >
+                            >
                                 <EditIcon />
                             </Fab>
                         </Tooltip>
                     </Zoom>
-                    <Zoom in={modifyOpen} style={{
-                        transitionDelay: modifyOpen ? '100ms' : '0ms',
-                    }}>
+
+                    <Zoom in={modifyOpen} style={{ transitionDelay: modifyOpen ? '100ms' : '0ms' }}>
                         <Tooltip title="Delete" placement="bottom">
                             <Fab
-                                onClick={() => {
-                                    if (dialogObject.value === null) {
-                                        notifyError("No object selected for deletion");
-                                        return;
-                                    }
-                                    if (dialogObject.type === "subject") {
-                                        const subjectUdeleteResult = update("subject", { id: dialogObject.value, isDeleted: true })
-                                        if (subjectUdeleteResult.ok) {
-                                            console.log("Subject deleted successfully:", subjectUdeleteResult);
-                                            notifySuccess("Successfully deleted");
-                                        } else {
-                                            console.error("Error deleting subject:", subjectUdeleteResult.error);
-                                            notifyError("Delete failed");
-                                        }
-                                    } else if (dialogObject.type === "landPart") {
-                                        const landPartDeleteResult = update("landPart", { id: dialogObject.value, isDeleted: true })
-                                        if (landPartDeleteResult.ok) {
-                                            console.log("Land part deleted successfully:", landPartDeleteResult);
-                                            notifySuccess("Successfully deleted");
-                                        } else {
-                                            console.error("Error deleting land part:", landPartDeleteResult.error);
-                                            notifyError("Delete failed");
-                                        }
-                                    } else if (dialogObject.type === "landOwnership") {
-                                        const ownershipDeleteResult = update("landOwnership", { id: dialogObject.value, isDeleted: true })
-                                        if (ownershipDeleteResult.ok) {
-                                            console.log("Ownership deleted successfully:", ownershipDeleteResult);
-                                            notifySuccess("Successfully deleted");
-                                        } else {
-                                            console.error("Error deleting ownership:", ownershipDeleteResult.error);
-                                            notifyError("Delete failed");
-                                        }
-                                    }
-                                }}
+                                onClick={handleDelete}
                                 color="error"
                                 size="large"
-                                sx={{ marginLeft: 1 }}
                             >
                                 <DeleteIcon />
                             </Fab>
