@@ -18,6 +18,7 @@ i18n
                 translation: {
                     home: 'Home',
                     settings: 'Settings',
+                    dividend: 'Dividend',
                     language: 'Language',
 
                     systemSectionLabel: 'System',
@@ -39,6 +40,7 @@ i18n
                 translation: {
                     home: 'Domov',
                     settings: 'Nastavenia',
+                    dividend: 'Dividenda',
                     language: 'Jazyk',
 
                     systemSectionLabel: 'Systém',

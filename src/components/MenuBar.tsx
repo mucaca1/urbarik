@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import SettingsIcon from '@mui/icons-material/Settings';
 import HomeIcon from '@mui/icons-material/Home';
 import CottageIcon from '@mui/icons-material/Cottage';
+import EuroIcon from '@mui/icons-material/Euro';
 import { AppBar, Box, Button, Container, IconButton, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -50,6 +51,13 @@ const MenuBar: React.FC = () => {
                                 <HomeIcon className="default-icon" />
                                 <CottageIcon className="hover-icon" />
                                 <span style={{ marginLeft: '8px' }}>{t('home')}</span>
+                            </Button>
+                            <Button
+                                color="inherit"
+                                onClick={() => navigate('/dividend')}
+                            >
+                                <EuroIcon />
+                                {t('dividend')}
                             </Button>
                             <Button
                                 color="inherit"

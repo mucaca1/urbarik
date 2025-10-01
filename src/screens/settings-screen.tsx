@@ -43,7 +43,7 @@ export const SettingsScreen: React.FC = () => {
                     select
                     label={t('language')}
                     fullWidth
-                    defaultValue={language}
+                    defaultValue={language || 'sk'}
                     onChange={(e) => setLanguage(e.target.value)}
                 >
                     <MenuItem value="en">En</MenuItem>

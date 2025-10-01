@@ -20,7 +20,7 @@ const EditorDialog: React.FC<SubjectEditorProps> = ({ title, showDialog, setShow
                 transition: Transition,
             }}
             keepMounted
-            onClose={() => setShowDialog(false)}
+            //onClose={() => setShowDialog(false)}
             aria-describedby="alert-dialog-slide-description"
         >
             <DialogTitle id="scroll-dialog-title">{title}</DialogTitle>

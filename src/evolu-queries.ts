@@ -10,7 +10,7 @@ const queryOptions = {
 export const getAllSubjectsQuery = evolu.createQuery((db) =>
     db.selectFrom("subject")
         .select(["id", "firstName", "lastName", "nationalIdNumber", "street", "houseNumber", "postCode", "city"])
-        .where("isDeleted", "is not", 1), queryOptions,
+        .where("isDeleted", "=", 0), queryOptions,
 );
 export type TAllSubjectsRow = typeof getAllSubjectsQuery.Row;
 
@@ -18,7 +18,7 @@ const getSubjectQuery = (subjectId: TSubjectId) =>
     evolu.createQuery((db) =>
         db.selectFrom("subject")
             .select(["id", "firstName", "lastName", "nationalIdNumber", "street", "houseNumber", "postCode", "city"])
-            .where("isDeleted", "is not", 1)
+            .where("isDeleted", "=", 0)
             .where("id", "=", subjectId).limit(1), queryOptions,
     );
 
@@ -52,7 +52,7 @@ export const getLandPart = async (landPartId: TLandPartId) => {
         evolu.createQuery((db) =>
             db.selectFrom("landPart")
                 .select(["id", "certificateOfOwnership", "plotDimensions"])
-                .where("isDeleted", "is not", 1)
+                .where("isDeleted", "=", 0)
                 .where("id", "=", landPartId).limit(1), queryOptions,
         )
     );
@@ -68,7 +68,7 @@ export const getLandPartWithOwnership = async (landPartId: TLandPartId) => {
                 .select(["landOwnership.id", "landPart.certificateOfOwnership", "landPart.plotDimensions",
                     "landOwnership.share",
                     "subject.firstName", "subject.lastName", "subject.nationalIdNumber", "subject.id as subjectId"])
-                .where("landPart.isDeleted", "is not", 1)
+                .where("landPart.isDeleted", "=", 0)
                 .where("landPart.id", "=", landPartId), queryOptions,
         )
     );
@@ -78,7 +78,7 @@ export const getLandPartWithOwnership = async (landPartId: TLandPartId) => {
 export const getAllLandOwnershipQuery = evolu.createQuery((db) =>
     db.selectFrom("landOwnership")
         .select(["id", "subjectId", "landPartId", "share"])
-        .where("isDeleted", "is not", 1)
+        .where("isDeleted", "=", 0)
         .select((eb) => [
             kysely.jsonObjectFrom(eb.selectFrom("subject")
                 .select(["id", "firstName", "lastName"])
@@ -97,12 +97,19 @@ export const getLandOwnership = async (landOwnershipId: TLandOwnershipId) => {
         evolu.createQuery((db) =>
             db.selectFrom("landOwnership")
                 .select(["id", "subjectId", "landPartId", "share"])
-                .where("isDeleted", "is not", 1)
+                .where("isDeleted", "=", 0)
                 .where("id", "=", landOwnershipId).limit(1), queryOptions,
         )
     );
     return landOwnershipRows;
 }
+
+export const getAllDividendBatchQuery = evolu.createQuery((db) => 
+    db.selectFrom("dividendBatch")
+        .select(["id"])
+        .where("isDeleted", "=", 0)
+        .orderBy("date", "desc"), queryOptions,
+);
 
 /*
 export const getAllSubjectsQuery = evolu.createQuery((db) =>

@@ -2,6 +2,7 @@ import { string } from "@effect/schema/FastCheck";
 import { NonNaNTypeId } from "@effect/schema/Schema";
 import {
     createEvolu,
+    DateIsoString,
     getOrThrow,
     id,
     Int,
@@ -11,7 +12,8 @@ import {
     NonNegativeNumber,
     nullOr,
     PositiveNumber,
-    SimpleName
+    SimpleName,
+    SqliteBoolean
 } from "@evolu/common";
 import { evoluReactWebDeps } from "@evolu/react-web";
 
@@ -23,6 +25,15 @@ export type TLandPartId = typeof LandPartId.Type;
 
 const LandOwnershipId = id("LandOwnershipId");
 export type TLandOwnershipId = typeof LandOwnershipId.Type;
+
+const DividendId = id("DividendId");
+export type TDividendId = typeof DividendId.Type;
+
+const DividendBatchId = id("DividendBatchId");
+export type TDividendBatchId = typeof DividendBatchId.Type;
+
+const DividendToLandPartId = id("DividendToLandPartId");
+export type TDividendToLandPartId = typeof DividendToLandPartId.Type;
 
 const NonEmptyString50 = maxLength(50)(NonEmptyString);
 type TNonEmptyString50 = typeof NonEmptyString50.Type;
@@ -53,10 +64,33 @@ export const LandOwnership = {
     share: PositiveNumber
 }
 
+const Dividend = {
+    id: DividendId,
+    subjectId: SubjectId,
+    amount: PositiveNumber,
+    dividendBatchId: DividendBatchId,
+    isPayed: SqliteBoolean
+}
+
+const DividendBatch = {
+    id: DividendBatchId,
+    date: DateIsoString,
+    totalAmount: PositiveNumber,
+}
+
+const DividendToLandPart = {
+    id: DividendToLandPartId,
+    dividendId: DividendId,
+    landPartId: LandPartId
+}
+
 const Schema = {
     subject: Subject,
     landPart: LandPart,
-    landOwnership: LandOwnership
+    landOwnership: LandOwnership,
+    dividend: Dividend,
+    dividendBatch: DividendBatch,
+    dividendToLandPart: DividendToLandPart
 };
 
 export const evolu = createEvolu(evoluReactWebDeps)(Schema, {

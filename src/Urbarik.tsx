@@ -12,6 +12,7 @@ import { HomeScreen } from "./screens/home-screen";
 import { ThemeProvider } from "./context/ThemeContext";
 import React from "react";
 import { UnitProvider } from "./context/UnitContext";
+import { DividendScreen } from "./screens/dividend-screen";
 
 export const Urbarik = memo(function Urbarik() {
     return (
@@ -32,6 +33,10 @@ export const Urbarik = memo(function Urbarik() {
                                             <Route
                                                 path="/settings"
                                                 element={<SettingsScreen />}
+                                            />
+                                            <Route
+                                                path="/dividend"
+                                                element={<DividendScreen />}
                                             />
                                         </Routes>
                                     </div>

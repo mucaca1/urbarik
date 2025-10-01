@@ -1,3 +1,8 @@
+/**
+ * 
+ * @param input string in the form of "numerator/denominator"
+ * @returns 
+ */
 export const parseFraction = (input: string): number => {
     const parts = input.split('/');
     if (parts.length === 2) {
@@ -10,6 +15,12 @@ export const parseFraction = (input: string): number => {
     return parseFloat(input); // fallback
 };
 
+/**
+ * Validate if input is valid fraction.
+ * For example: "3/4" is valid, "3/a" or "3/0" is not valid.
+ * @param input string in the form of "numerator/denominator"
+ * @returns boolean (true if valid, false otherwise)
+ */
   export const isValidFraction = (input: string): boolean => {
     const parts = input.split('/');
     if (parts.length !== 2) return false;

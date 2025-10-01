@@ -5,12 +5,13 @@
   "description": "My Electron application description",
   "main": ".vite/build/main.js",
   "scripts": {
-    "build": "electron-forge make",
+    "vite:dev": "vite",
     "clean": "shx rm -rf node_modules .vite out",
-    "dev": "electron-forge start",
     "lint": "eslint --ext .ts,.tsx .",
-    "package": "electron-forge package",
-    "publish": "electron-forge publish"
+    "electron:dev": "electron-forge start",
+    "electron:build": "electron-forge make",
+    "electron:package": "electron-forge package",
+    "electron:publish": "electron-forge publish"
   },
   "keywords": [],
   "author": {

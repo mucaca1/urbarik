@@ -16,6 +16,8 @@ interface FractionInputProps {
   onChange?: (value: number | null) => void;
   required?: boolean;
   maxValue?: number
+  fractionInputOnly?: boolean;
+  simplifyFraction?: boolean;
 }
 
 const FractionInput: React.FC<FractionInputProps> = ({
@@ -23,9 +25,10 @@ const FractionInput: React.FC<FractionInputProps> = ({
   value = null,
   onChange = (v: number | null) => {},
   required = false,
-  maxValue = 1
+  maxValue = 1,
+  fractionInputOnly = true,
 }) => {
-  const [isFractionMode, setIsFractionMode] = useState(false);
+  const [isFractionMode, setIsFractionMode] = useState(fractionInputOnly);
   const [inputValue, setInputValue] = useState<string>(
     value !== null ? value.toString() : ''
   );
@@ -70,10 +73,20 @@ const FractionInput: React.FC<FractionInputProps> = ({
     setIsFractionMode(!isFractionMode);
   };
 
+  const endAdornmentElement = fractionInputOnly ? <div></div> : (
+    <InputAdornment position="end">
+      <Tooltip title={isFractionMode ? 'Switch to decimal' : 'Switch to fraction'}>
+        <IconButton onClick={handleToggle} size="small">
+          <SwapHorizIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    </InputAdornment>
+  );
+
   return (
     <TextField
       label={label}
-      type={isFractionMode ? 'text' : 'number'}
+      type={isFractionMode || fractionInputOnly ? 'text' : 'number'}
       value={inputValue}
       onChange={handleInputChange}
       error={!!error}
@@ -84,23 +97,13 @@ const FractionInput: React.FC<FractionInputProps> = ({
           required,
           'aria-required': required ? 'true' : 'false',
           endAdornment: (
-            <InputAdornment position="end">
-              <Tooltip title={isFractionMode ? 'Switch to decimal' : 'Switch to fraction'}>
-                <IconButton onClick={handleToggle} size="small">
-                  <SwapHorizIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </InputAdornment>
+            endAdornmentElement
           ),
         },
       }}
     />
   );
 };
-
-interface ValidationError {
-  readonly message: string;
-}
 
 const validateInput = (value: string, required: boolean, isFractionMode: boolean, maxValue: number): Result<number | null, string> => {
   if (value === '') {
